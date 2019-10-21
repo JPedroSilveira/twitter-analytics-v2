@@ -1,8 +1,5 @@
 import pickle
 
-from Data.Tweet import Tweet
-from Database.Info import Info
-
 _FILE_DIR = "./Database/"
 _END_OF_FILE = ".db"
 _INIT_OF_THE_FILE = 0
