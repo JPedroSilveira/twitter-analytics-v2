@@ -1,0 +1,11 @@
+# Ignore IDE files
+.idea
+
+# Ignore PyCache
+*.pyc
+
+# Ignore Twitter Credentials
+Twitter/twitter_credentials.json
+
+# Ignore Databases
+*.db
