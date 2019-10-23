@@ -8,13 +8,12 @@ _TAG_LIST = ['JJ', 'JJR ', 'JJS', 'NN', 'NNS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 
 
 class Tweet:
 
-    def __init__(self):
-        self.id = None
-        self.twitter_id = None
-        self.created_at = None
-        self.text = None
-        self.filtred_text = None
-        self.user_id = None
+    id = None
+    twitter_id = None
+    created_at = None
+    text = None
+    filtered_text = None
+    user_id = None
 
     def save_data(self, tweet_data):
         try:
@@ -33,8 +32,12 @@ class Tweet:
 
     def filter_text(self):
         st = LancasterStemmer()  # Normalize the words
-        self.filtred_text = ''  # Initialize the string
+        self.filtered_text = ''  # Initialize the string
 
         for token in nltk.pos_tag(self.text.split()):  # Filter all words based in their types using the list _TAG_LIST
             if token[1] in _TAG_LIST:
-                self.filtred_text = self.filtred_text + ' ' + st.stem(token[0])
+                self.filtered_text = self.filtered_text + ' ' + st.stem(token[0])
+
+    def get_serializable(self):
+        return {"id": self.id, "twitter_id": self.twitter_id, "created_at": self.created_at, "text": self.text,
+                "filtered_text": self.filter_text(), "user_id": self.user_id}

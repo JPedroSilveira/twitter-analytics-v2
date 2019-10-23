@@ -2,17 +2,17 @@ from twython import TwythonStreamer
 from Data.Tweet import Tweet
 from Data.Hashtag import Hashtag
 from Data.User import User
-from Database.Maneger import DatabaseManeger
+from Database.Maneger import Maneger
 
 
 def save_tweet(tweet):
-    database = DatabaseManeger(Tweet)
+    database = Maneger(Tweet)
     database.save(tweet)
 
 
 def load_tweet(tweet_id):
-    database = DatabaseManeger(Tweet)
-    return database.load(tweet_id)
+    database = Maneger(Tweet)
+    return database.find_by_id(tweet_id)
 
 
 class AnalitycalTwitterStreamer(TwythonStreamer):
