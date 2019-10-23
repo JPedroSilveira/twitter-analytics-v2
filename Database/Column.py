@@ -1,0 +1,2 @@
+class ColumnInfo:
+    columns = []
