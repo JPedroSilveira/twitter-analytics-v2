@@ -8,6 +8,3 @@ class BNode:
         self.keys = []
         self.leaf = True
         self.children = []
-
-    def find_key(self, key):
-        

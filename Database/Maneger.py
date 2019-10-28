@@ -1,5 +1,4 @@
 import inspect
-import json
 import os
 
 _ROOT_DIR = "Database"
@@ -12,6 +11,9 @@ _TYPE_OF_TABLE_FILE = ".dbt"
 _INIT_OF_THE_FILE = 0
 _ABSOLUTE_FILE_POSITION = 0
 _SEPARATOR = b'"0'
+_STRING_SEPARATOR = '\0'
+_TYPE_SEPARATOR_START = '('
+_TYPE_SEPARATOR_END = ')'
 _NULL = b'0'
 _ENCONDE = 'utf-8'
 _MAX_SIZE = 99999
@@ -85,29 +87,45 @@ class Maneger:
         return self.decode_serialized_obj(obj_bytes)
 
     def get_serialized_obj(self, obj):
-        dict_obj = {}
+        string_obj = ""
 
         for attr in self.get_columns():
-            dict_obj[attr] = getattr(obj, attr)
+            value = getattr(obj, attr)
+            if value is not None:
+                string_obj = string_obj + _STRING_SEPARATOR + _TYPE_SEPARATOR_START + type(value).__name__ \
+                             + _TYPE_SEPARATOR_END + str(value)
+            else:
+                string_obj = string_obj + _STRING_SEPARATOR
 
-        return bytes(json.dumps(dict_obj), _ENCONDE)
+        return bytes(string_obj, _ENCONDE)
 
     def decode_serialized_obj(self, bytes_obj):
         obj = self.db_class()
 
-        dict_obj = json.loads(bytes.decode(bytes_obj, _ENCONDE))
+        string_obj = bytes.decode(bytes_obj, _ENCONDE).split(_STRING_SEPARATOR)
 
         for attr in self.get_columns():
-            setattr(obj, attr, dict_obj[attr])
+            type_ = attr[1:attr.index(_TYPE_SEPARATOR_END)]
+
+            if type_ == 'str':
+                value = attr[attr.index(_TYPE_SEPARATOR_END) + 1:]
+            elif type_ == 'int':
+                value = int(attr[attr.index(_TYPE_SEPARATOR_END) + 1:])
+            elif type_ == 'float':
+                value = float(attr[attr.index(_TYPE_SEPARATOR_END) + 1:])
+
+            setattr(obj, attr, value)
 
         return obj
 
     def get_columns(self):
-        return [a[0] for a in (inspect.getmembers(self.db_class,
+        data = [a[0] for a in (inspect.getmembers(self.db_class,
                                                   lambda a: not (inspect.isroutine(a)
                                                                  or inspect.ismethod(a)
                                                                  or inspect.isfunction(a))))
                 if not (a[0].startswith('__') and a[0].endswith('__'))]
+        data.sort()
+        return data
 
     def get_table_file_name(self, table_name):
         return self.get_class_database_dir() + \
