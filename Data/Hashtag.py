@@ -1,12 +1,11 @@
-from Data.TwitterConversionException import TwitterConversionException
+from Data.Error.TwitterConversionException import TwitterConversionException
 
 
 class Hashtag:
 
-    def __init__(self):
-        self.text = None
-        self.id = None
-        self.tweet_list = []
+    id = 0
+    text = ''
+    text_size = 100
 
     def save_data(self, hashtag_data):
         try:

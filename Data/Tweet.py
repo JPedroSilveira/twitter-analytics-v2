@@ -1,20 +1,22 @@
 from unidecode import unidecode
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
-from Data.TwitterConversionException import TwitterConversionException
+from Data.Error.TwitterConversionException import TwitterConversionException
 
 _TAG_LIST = ['JJ', 'JJR ', 'JJS', 'NN', 'NNS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
 
 
 class Tweet:
 
-    def __init__(self):
-        self.id = None
-        self.twitter_id = None
-        self.created_at = None
-        self.text = None
-        self.filtred_text = None
-        self.user_id = None
+    id = 0
+    twitter_id = 0
+    user_id = 0
+    created_at = ''
+    created_at_size = 50
+    text = ''
+    text_size = 280
+    filtered_text = ''
+    filtered_text_size = 280
 
     def save_data(self, tweet_data):
         try:
@@ -33,8 +35,9 @@ class Tweet:
 
     def filter_text(self):
         st = LancasterStemmer()  # Normalize the words
-        self.filtred_text = ''  # Initialize the string
+        self.filtered_text = ''  # Initialize the string
 
-        for token in nltk.pos_tag(self.text.split()):  # Filter all words based in their types using the list _TAG_LIST
+        # Filter all words based in their types using the list _TAG_LIST
+        for token in nltk.pos_tag(self.text.lower().split()):
             if token[1] in _TAG_LIST:
-                self.filtred_text = self.filtred_text + ' ' + st.stem(token[0])
+                self.filtered_text = self.filtered_text + ' ' + st.stem(token[0])
