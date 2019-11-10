@@ -2,6 +2,7 @@ from unidecode import unidecode
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
 from Data.Error.TwitterConversionException import TwitterConversionException
+from Database.Cons import SupportedTypes
 
 _TAG_LIST = ['JJ', 'JJR ', 'JJS', 'NN', 'NNS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
 
@@ -17,6 +18,9 @@ class Tweet:
     text_size = 280
     filtered_text = ''
     filtered_text_size = 280
+    test = [1,-5,9,10,222,34,231,121,325535,34634,123,123213,3221]
+    test_size = 13
+    test_type = SupportedTypes.INT_NAME
 
     def save_data(self, tweet_data):
         try:

@@ -18,9 +18,12 @@ class TableManeger:
 
     # Save a new record in the table
     def save(self, obj) -> object:
-        # Open in append mode
         with open(self.table_file, 'ab') as table_file:
             file_tell = table_file.tell()
+
+        # Open in append mode
+        with open(self.table_file, 'r+b') as table_file:
+            table_file.seek(file_tell, File.ABSOLUTE_FILE_POSITION)
             obj.id = FileIndexHelper.get_last_id_by_file_end(self.db_class, file_tell)
             ObjectReadWriteHelper.write_obj(table_file, obj)
 
@@ -29,8 +32,6 @@ class TableManeger:
         return obj
 
     def find_by_id(self, obj_id: int) -> object:
-        obj = None
-
         with open(self.table_file, 'rb') as table_file:
             seek_pos = FileIndexHelper.calculate_index_by_id(self.db_class, obj_id)
             table_file.seek(seek_pos, File.ABSOLUTE_FILE_POSITION)

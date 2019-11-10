@@ -1,12 +1,12 @@
 import struct
 import Database.Cons.Encode as Encode
-import Database.Cons.PrimitiveType as PrimitiveType
+import Database.Cons.SupportedTypes as SupportedTypes
 
 
 # FUNCTIONS -> CONVERT TO BINARY
 
 # Convert a python float to a binary struct double
-def convert_to_bin_double(value: float) -> bytes:
+def convert_to_bin_float(value: float) -> bytes:
     return struct.pack('d', value)
 
 
@@ -29,7 +29,7 @@ def convert_to_bin_bool(value: bool) -> bytes:
 # FUNCTIONS -> CONVERT FROM BINARY
 
 # Convert a binary struct double to a python float
-def convert_from_bin_double(value: bytes) -> float:
+def convert_from_bin_float(value: bytes) -> float:
     return struct.unpack('d', value)[0]
 
 
@@ -40,13 +40,13 @@ def convert_from_bin_int(value: bytes) -> int:
 
 # Convert a binary struct char to a python string of length 1
 def convert_from_bin_char(value: bytes) -> str:
-    return (struct.unpack('c', value.encode(Encode.DEFAULT_STR_ENCONDE))[0]).decode(Encode.DEFAULT_STR_ENCONDE)
+    return value.decode(Encode.DEFAULT_STR_ENCONDE)
 
 
 # Convert a binary struct int to a python int
 def convert_from_bin_bool(value: bytes) -> bool:
     # Exception: if read empty in bool mode return False
-    if value == PrimitiveType.EMPTY_BINARY:
+    if value == SupportedTypes.EMPTY_BINARY:
         return False
 
     return struct.unpack('b', value)[0] == 1

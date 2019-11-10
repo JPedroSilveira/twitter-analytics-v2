@@ -37,7 +37,7 @@ class AnalitycalTwitterStreamer(TwythonStreamer):
                 hashtag = Hashtag()
                 success = hashtag.save_data(hashtag_data)
                 if success:
-                    hashtag = save_hashtag(hashtag)
+                    # hashtag = save_hashtag(hashtag)
                     hashtag_id_list.append(hashtag.id)
 
             user = User()
