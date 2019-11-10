@@ -1,5 +1,5 @@
 import inspect
-import Database.Cons.PrimitiveType as PrimitiveType
+import Database.Cons.SupportedTypes as SupportedTypes
 import Database.Error.ClassError as ClassError
 import Database.Cons.File as File
 
@@ -24,7 +24,7 @@ def get_class_name(obj_class: type) -> str:
 
 
 # Return the name of the primitive type of a attribute
-def get_primitive_type_name(attribute) -> str:
+def get_type_name(attribute) -> str:
     return type(attribute).__name__
 
 
@@ -35,45 +35,81 @@ def get_class_size(obj_class: type) -> int:
 
     for column in columns:
         if not is_info_variable(column):
-            size = size + get_primitive_column_size(obj_class, column, columns)
+            size = size + get_column_size(obj_class, column, columns)
 
     # Sum the size of exists flag
     return size + File.FLAG_EXISTS_SIZE
 
 
-# Return the size of a primitive type or a string in a obj
-def get_primitive_column_size(obj_class: type, column: str, columns: list) -> int:
-    column_type_name = get_primitive_type_name(getattr(obj_class, column))
+# Return the size of a supported type in a obj
+def get_column_size(obj_class: type, column: str, columns: list) -> int:
+    column_type_name = get_type_name(getattr(obj_class, column))
 
-    if column_type_name == PrimitiveType.INT_NAME:
-        return PrimitiveType.INT_SIZE
+    if column_type_name == SupportedTypes.INT_NAME:
+        return SupportedTypes.INT_SIZE
 
-    if column_type_name == PrimitiveType.FLOAT_NAME:
-        return PrimitiveType.DOUBLE_SIZE
+    if column_type_name == SupportedTypes.FLOAT_NAME:
+        return SupportedTypes.FLOAT_SIZE
 
-    if column_type_name == PrimitiveType.BOOL_NAME:
-        return PrimitiveType.BOOL_SIZE
+    if column_type_name == SupportedTypes.BOOL_NAME:
+        return SupportedTypes.BOOL_SIZE
 
-    if column_type_name == PrimitiveType.STRING_NAME:
-        return get_str_attibute_size(obj_class, column, columns)
+    if column_type_name == SupportedTypes.STRING_NAME:
+        # Add one of the end char '\0'
+        return (get_attibute_size(obj_class, column, columns) + 1) * SupportedTypes.CHAR_SIZE
+
+    if column_type_name == SupportedTypes.LIST_NAME:
+        list_type = get_list_type_attribute(obj_class, column, columns)
+
+        list_type_size = SupportedTypes.get_attribute_size_by_name(list_type)
+
+        if list_type_size is None:
+            raise ClassError.AttributeWithoutValidPrimitiveType(
+                'Class ' + obj_class + ' has a list with not property type')
+
+        list_size = get_attibute_size(obj_class, column, columns)
+
+        # Check if the attribute size have been sent
+        if list_size is None:
+            raise ClassError.AttributeSizeOfListCantBeNone('Class ' + obj_class + ' has a not supported type!')
+
+        # The size of a list is the size of each element multiplied by the list max size plus a
+        # int size that is used to save the real list size
+        return list_size * list_type_size + SupportedTypes.INT_SIZE
 
     raise ClassError.AttributeWithoutValidPrimitiveType('Class ' + obj_class + ' has a attribute ' + column +
                                                         ' with a invalid type!')
 
 
-# Return value of the attribute with the string size
-def get_str_attibute_size(obj_class: type, column: str, columns: list) -> int:
-    str_size_attribute = column + PrimitiveType.END_OF_STRING_SIZE_VARIABLE
-    size_attr_list = list(filter(lambda x: x == str_size_attribute, columns))
+def get_list_type_attribute(obj_class: type, column: str, columns: list):
+    list_type_attribute = column + SupportedTypes.END_OF_LIST_TYPE_VARIABLE
 
+    list_type_attr_list = list(filter(lambda x: x == list_type_attribute, columns))
+
+    # Verify if found any list type attribute
+    if len(list_type_attr_list) == 0:
+        raise ClassError.AttributeWithoutTypeException('Class ' + obj_class + ' has no attribute ' +
+                                                       list_type_attribute + ' with the type of the list ' + column + '!')
+
+    return getattr(obj_class, list_type_attr_list[0])
+
+
+# Return value of the attribute with the string or list max size
+def get_attibute_size(obj_class: type, column: str, columns: list) -> int:
+    size_attribute = column + SupportedTypes.END_OF_SIZE_VARIABLE
+
+    size_attr_list = list(filter(lambda x: x == size_attribute, columns))
+
+    # Verify if found any size attribute
     if len(size_attr_list) == 0:
-        raise ClassError.StringWithoutSizeException('Class ' + obj_class + ' has no attribute ' +
-                                                    str_size_attribute + ' with the max size of ' + column + '!')
+        raise ClassError.AttributeWithoutSizeException('Class ' + obj_class + ' has no attribute ' +
+                                                       size_attribute + ' with the max size of ' + column + '!')
 
-    # Add one of the end char
-    return (getattr(obj_class, size_attr_list[0]) + 1) * PrimitiveType.CHAR_SIZE
+    return getattr(obj_class, size_attr_list[0])
 
 
 # Return if the column is a info variable that can't be saved in database
 def is_info_variable(column: str):
-    return column.endswith(PrimitiveType.END_OF_STRING_SIZE_VARIABLE)
+    return (column.endswith(SupportedTypes.END_OF_SIZE_VARIABLE)
+            or column.endswith(SupportedTypes.END_OF_LIST_TYPE_VARIABLE)
+            or column.endswith(SupportedTypes.END_OF_INDEX_ATTRIBUTE))

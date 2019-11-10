@@ -1,4 +1,4 @@
-import Database.Cons.PrimitiveType as PrimitiveType
+import Database.Cons.SupportedTypes as PrimitiveType
 
 ABSOLUTE_FILE_POSITION = 0
 
