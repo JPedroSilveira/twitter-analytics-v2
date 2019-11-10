@@ -125,7 +125,7 @@ def write_list_end_values(
         convert_function = StructDataHelper.convert_to_bin_bool
     elif value_type == SupportedTypes.STRING_NAME:
         # Sum one of the string end char
-        size = SupportedTypes.CHAR_SIZE * (string_size + 1)
+        size = SupportedTypes.CHAR_SIZE * string_size
         end = SupportedTypes.STRING_END
         convert_function = StructDataHelper.convert_to_bin_char
     else:
@@ -203,8 +203,7 @@ def read_str(buffer: _io.BufferedRandom, max_size: int) -> str:
         char_count = char_count + 1
 
     # Place the buffer in the end of the string
-    if char_count != max_size:
-        buffer.seek(buffer.tell() + (max_size - char_count) * SupportedTypes.CHAR_SIZE, File.ABSOLUTE_FILE_POSITION)
+    buffer.seek(buffer.tell() + (max_size - char_count) * SupportedTypes.CHAR_SIZE, File.ABSOLUTE_FILE_POSITION)
 
     return value
 

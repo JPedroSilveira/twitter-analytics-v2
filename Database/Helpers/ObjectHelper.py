@@ -55,15 +55,13 @@ def get_column_size(obj_class: type, column: str) -> int:
         return SupportedTypes.BOOL_SIZE
 
     if column_type_name == SupportedTypes.STRING_NAME:
-        # Add one of the end char '\0'
-        return (get_attribute_size(obj_class, column) + 1) * SupportedTypes.CHAR_SIZE
+        return get_attribute_size(obj_class, column) * SupportedTypes.CHAR_SIZE
 
     if column_type_name == SupportedTypes.LIST_NAME:
         list_type = get_list_type_attribute(obj_class, column)
 
         if list_type == SupportedTypes.STRING_NAME:
-            # Sum one of the string end
-            list_type_size = get_attribute_list_string_size(obj_class, column) + 1
+            list_type_size = get_attribute_list_string_size(obj_class, column)
         else:
             list_type_size = SupportedTypes.get_primitive_attribute_size_by_name(list_type)
 
@@ -108,7 +106,8 @@ def get_attribute_list_string_size(obj_class: type, column: str) -> int:
 def is_info_variable(column: str):
     return (column.endswith(SupportedTypes.END_OF_SIZE_VARIABLE)
             or column.endswith(SupportedTypes.END_OF_LIST_TYPE_VARIABLE)
-            or column.endswith(SupportedTypes.END_OF_INDEX_ATTRIBUTE))
+            or column.endswith(SupportedTypes.END_OF_INDEX_ATTRIBUTE)
+            or column.endswith(SupportedTypes.END_OF_LIST_STRING_SIZE_VARIABLE))
 
 
 def get_attr_value_by_name(obj_class: object, column: str):
