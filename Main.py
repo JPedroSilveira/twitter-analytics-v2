@@ -14,9 +14,9 @@ def main():
 
     maneger = TableManeger(Tweet)
 
-    maneger.find_by_id(1)
+    maneger.find_by_id(0)
 
-    maneger.delete_by_id(1)
+    #maneger.delete_by_id(1)
 
 
 main()

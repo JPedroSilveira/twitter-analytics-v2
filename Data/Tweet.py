@@ -18,9 +18,10 @@ class Tweet:
     text_size = 280
     filtered_text = ''
     filtered_text_size = 280
-    test = [1,-5,9,10,222,34,231,121,325535,34634,123,123213,3221]
-    test_size = 13
-    test_type = SupportedTypes.INT_NAME
+    test = ['teste','teste2','parara','lelele']
+    test_size = 4
+    test_size_string = 6
+    test_type = SupportedTypes.STRING_NAME
 
     def save_data(self, tweet_data):
         try:

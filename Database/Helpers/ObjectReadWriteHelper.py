@@ -20,12 +20,16 @@ def write_obj(buffer: _io.BufferedRandom, obj_class: type):
 
             if column_type_name in SupportedTypes.COMPLEX_TYPES_NAME:
                 if column_type_name == SupportedTypes.STRING_NAME:
-                    max_size = ObjectHelper.get_attibute_size(obj_class, column, columns)
+                    max_size = ObjectHelper.get_attribute_size(obj_class, column)
                     ReadWriteHelper.write_complex_value(buffer, value, max_size)
-                else:
-                    list_type = ObjectHelper.get_list_type_attribute(obj_class, column, columns)
-                    max_size = ObjectHelper.get_attibute_size(obj_class, column, columns)
-                    ReadWriteHelper.write_complex_value(buffer, value, max_size, list_type)
+                else:  # List type
+                    list_type = ObjectHelper.get_list_type_attribute(obj_class, column)
+
+                    if list_type == SupportedTypes.STRING_NAME:
+                        list_string_type_size = ObjectHelper.get_attribute_list_string_size(obj_class, column)
+
+                    max_size = ObjectHelper.get_attribute_size(obj_class, column)
+                    ReadWriteHelper.write_complex_value(buffer, value, max_size, list_type, list_string_type_size)
             else:
                 ReadWriteHelper.write_primitive_value(buffer, value)
 
@@ -58,12 +62,18 @@ def read_obj(buffer: _io.BufferedRandom, obj_class: type):
 
             if column_type_name in SupportedTypes.COMPLEX_TYPES_NAME:
                 if column_type_name == SupportedTypes.STRING_NAME:
-                    max_size = ObjectHelper.get_attibute_size(obj_class, column, columns)
+                    max_size = ObjectHelper.get_attribute_size(obj_class, column)
                     setattr(obj, column, ReadWriteHelper.read_complex_type(buffer, value, max_size))
-                else:
-                    max_size = ObjectHelper.get_attibute_size(obj_class, column, columns)
-                    list_type = ObjectHelper.get_list_type_attribute(obj_class, column, columns)
-                    setattr(obj, column, ReadWriteHelper.read_complex_type(buffer, value, max_size, list_type))
+                else:  # Complex type list
+                    max_size = ObjectHelper.get_attribute_size(obj_class, column)
+                    list_type = ObjectHelper.get_list_type_attribute(obj_class, column)
+                    list_string_size = None
+
+                    if list_type == SupportedTypes.STRING_NAME:
+                        list_string_size = ObjectHelper.get_attribute_list_string_size(obj_class, column)
+
+                    setattr(obj, column, ReadWriteHelper.read_complex_type(
+                        buffer, value, max_size, list_type, list_string_size))
             else:
                 setattr(obj, column, ReadWriteHelper.read_primitive_type(buffer, value))
 
