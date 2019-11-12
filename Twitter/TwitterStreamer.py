@@ -3,26 +3,26 @@ from twython import TwythonStreamer
 from Data.Hashtag import Hashtag
 from Data.Tweet import Tweet
 from Data.User import User
-from Database.TableManeger import TableManeger
+from Database.TableManager import TableManager
 
 
 def save_tweet(tweet: object) -> object:
-    database = TableManeger(Tweet)
+    database = TableManager(Tweet)
     return database.save(tweet)
 
 
 def save_hashtag(hashtag: object) -> object:
-    database = TableManeger(Hashtag)
+    database = TableManager(Hashtag)
     return database.save(hashtag)
 
 
 def save_user(user: object) -> object:
-    database = TableManeger(User)
+    database = TableManager(User)
     return database.save(user)
 
 
 def load_tweet(tweet_id: int) -> object:
-    database = TableManeger(Tweet)
+    database = TableManager(Tweet)
     return database.find_by_id(tweet_id)
 
 
