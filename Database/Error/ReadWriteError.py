@@ -23,6 +23,11 @@ class WritingAListOfInvalidType(Error):
     pass
 
 
+class StringMaxSizeInListOfStringNotGive(Error):
+    """To write a list of string type you need to give the max size of the string"""
+    pass
+
+
 class WritingAListWithDifferentTypes(Error):
     """A List can just have one type of variable"""
 

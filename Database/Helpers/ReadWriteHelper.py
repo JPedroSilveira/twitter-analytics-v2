@@ -6,12 +6,6 @@ import Database.Cons.SupportedTypes as SupportedTypes
 import Database.Error.ReadWriteError as ReadWriteError
 import Database.Cons.File as File
 
-_STRING_SIZE_NAME = '_size'
-_STRING_END = '\0'
-_BOOL_END = False
-_INT_END = 0
-_FLOAT_END = 0.0
-
 
 # WRITE FUNCTIONS: WRITE A TYPED VALUE WITH A BUFFER
 def write_primitive_value(buffer: _io.BufferedRandom, value):
@@ -30,13 +24,13 @@ def write_primitive_value(buffer: _io.BufferedRandom, value):
         raise ReadWriteError.WritingANonPrimitiveType('Value ' + value + ' can\'t be a non primitive type!')
 
 
-def write_complex_value(buffer: _io.BufferedRandom, values, size, list_type=None):
+def write_complex_value(buffer: _io.BufferedRandom, values, size, list_type=None, list_type_size=None):
     complex_type_name = ObjectHelper.get_type_name(values)
 
     if complex_type_name == SupportedTypes.STRING_NAME:
         write_str(buffer, values, size)
     elif complex_type_name == SupportedTypes.LIST_NAME:
-        write_list(buffer, values, size, list_type)
+        write_list(buffer, values, size, list_type, list_type_size)
 
 
 def write_int(buffer: _io.BufferedRandom, value: int):
@@ -52,15 +46,12 @@ def write_str(buffer: _io.BufferedRandom, value: str, max_size: int):
     value = _remove_invalid_char(value)
 
     for char in value:
-        if stop_count == max_size:
-            break
-
         buffer.write(StructDataHelper.convert_to_bin_char(char))
 
         stop_count = stop_count + 1
 
-    # Write the end of the string
-    buffer.write(StructDataHelper.convert_to_bin_char(_STRING_END))
+        if stop_count == max_size:
+            break
 
     # Seek the empty space
     if max_size > stop_count:
@@ -69,11 +60,11 @@ def write_str(buffer: _io.BufferedRandom, value: str, max_size: int):
         # Then seek to the end of the string max_size and write other end to preserve the fixed size
         # The minus one is to preserve the space for string final
         buffer.seek(pos + (max_size - stop_count - 1)*SupportedTypes.CHAR_SIZE, File.ABSOLUTE_FILE_POSITION)
-        buffer.write(StructDataHelper.convert_to_bin_char(_STRING_END))
+        buffer.write(StructDataHelper.convert_to_bin_char(SupportedTypes.STRING_END))
 
 
 # A LIST NEED TO BE COMPOSED WITH JUST ONE TYPE
-def write_list(buffer: _io.BufferedRandom, values: list, max_size: int, list_type: str):
+def write_list(buffer: _io.BufferedRandom, values: list, max_size: int, list_type: str, list_string_size: None):
     stop_count = 0
 
     # Verify if the type is valid
@@ -84,6 +75,10 @@ def write_list(buffer: _io.BufferedRandom, values: list, max_size: int, list_typ
     if len(values) > max_size:
         raise ReadWriteError.WritingAListBiggerThanMaxSize(
             'The list size ' + str(len(values)) + ' is bigger than expected ' + max_size + '!')
+
+    # If String type then verify if the max size of each string is given
+    if list_type == SupportedTypes.STRING_NAME and list_string_size is None:
+        raise ReadWriteError.StringMaxSizeInListOfStringNotGive('List string size not given!')
 
     # First write the list size
     write_primitive_value(buffer, len(values))
@@ -97,30 +92,39 @@ def write_list(buffer: _io.BufferedRandom, values: list, max_size: int, list_typ
             raise ReadWriteError.WritingAListWithDifferentTypes(
                 'List with multiple types!')
 
-        write_primitive_value(buffer, value)
+        if list_type == SupportedTypes.STRING_NAME:
+            write_complex_value(buffer, value, list_string_size)
+        else:
+            write_primitive_value(buffer, value)
 
         stop_count = stop_count + 1
 
     # If not a complete array, seek for the final and write a symbolic empty value
     if len(values) < max_size:
-        write_list_end_values(buffer, list_type, stop_count, max_size)
+        write_list_end_values(buffer, list_type, stop_count, max_size, list_string_size)
 
 
 # Write empty values to complete the list size
-def write_list_end_values(buffer: _io.BufferedRandom, value_type: str, stop_count: int, max_size: int):
+def write_list_end_values(
+        buffer: _io.BufferedRandom, value_type: str, stop_count: int, max_size: int, string_size: int):
 
     if value_type == SupportedTypes.INT_NAME:
         size = SupportedTypes.INT_SIZE
-        end = _INT_END
+        end = SupportedTypes.INT_END
         convert_function = StructDataHelper.convert_to_bin_int
     elif value_type == SupportedTypes.FLOAT_NAME:
         size = SupportedTypes.FLOAT_SIZE
-        end = _FLOAT_END
+        end = SupportedTypes.FLOAT_END
         convert_function = StructDataHelper.convert_to_bin_float
     elif value_type == SupportedTypes.BOOL_NAME:
         size = SupportedTypes.BOOL_SIZE
-        end = _BOOL_END
+        end = SupportedTypes.BOOL_END
         convert_function = StructDataHelper.convert_to_bin_bool
+    elif value_type == SupportedTypes.STRING_NAME:
+        # Sum one of the string end char
+        size = SupportedTypes.CHAR_SIZE * string_size
+        end = SupportedTypes.STRING_END
+        convert_function = StructDataHelper.convert_to_bin_char
     else:
         raise ReadWriteError.WritingAListOfInvalidType(
             'Type ' + value_type + ' isn`t part of the list of type ' + value_type + '!')
@@ -159,13 +163,13 @@ def read_primitive_type(buffer: _io.BufferedRandom, value):
 
 
 # READ COMPLEX TYPES
-def read_complex_type(buffer: _io.BufferedRandom, value, max_size=0, list_type=None):
+def read_complex_type(buffer: _io.BufferedRandom, value, max_size=0, list_type=None, list_string_size=None):
     complex_type_name = ObjectHelper.get_type_name(value)
 
     if complex_type_name == SupportedTypes.STRING_NAME:
         return read_str(buffer, max_size)
     elif complex_type_name == SupportedTypes.LIST_NAME:
-        return read_list(buffer, max_size, list_type)
+        return read_list(buffer, max_size, list_type, list_string_size)
 
 
 def read_int(buffer: _io.BufferedRandom) -> int:
@@ -188,21 +192,22 @@ def read_str(buffer: _io.BufferedRandom, max_size: int) -> str:
     while char_count < max_size:
         new_char = StructDataHelper.convert_from_bin_char(buffer.read(SupportedTypes.CHAR_SIZE))
 
+        char_count = char_count + 1
+
         # \0 is the end
-        if new_char == _STRING_END:
+        if new_char == SupportedTypes.STRING_END:
             break
 
         value = value + new_char
-        char_count = char_count + 1
+
 
     # Place the buffer in the end of the string
-    if char_count != max_size:
-        buffer.seek(buffer.tell() + (max_size - char_count) * SupportedTypes.CHAR_SIZE, File.ABSOLUTE_FILE_POSITION)
+    buffer.seek(buffer.tell() + (max_size - char_count) * SupportedTypes.CHAR_SIZE, File.ABSOLUTE_FILE_POSITION)
 
     return value
 
 
-def read_list(buffer: _io.BufferedRandom, max_size: int, list_type: str) -> list:
+def read_list(buffer: _io.BufferedRandom, max_size: int, list_type: str, list_string_size: int) -> list:
     return_list = []
     list_size = StructDataHelper.convert_from_bin_int(buffer.read(SupportedTypes.INT_SIZE))
     count = 0
@@ -216,17 +221,23 @@ def read_list(buffer: _io.BufferedRandom, max_size: int, list_type: str) -> list
     elif list_type == SupportedTypes.BOOL_NAME:
         convert_function = StructDataHelper.convert_from_bin_bool
         type_size = SupportedTypes.BOOL_SIZE
+    elif list_type == SupportedTypes.STRING_NAME:
+        # Plus one of the string end
+        type_size = SupportedTypes.CHAR_SIZE * (list_string_size + 1)
     else:
         raise ReadWriteError.ReadingAListOfInvalidType('The list has this invalid type:' + list_type)
 
     # Read all elements from the list
     while count < list_size:
-        return_list.append(convert_function(buffer.read(type_size)))
+        if list_type == SupportedTypes.STRING_NAME:
+            return_list.append(read_str(buffer, list_string_size))
+        else:
+            return_list.append(convert_function(buffer.read(type_size)))
 
         count = count + 1
 
     # Place the buffer in the end of the list
-    if count != max_size:
+    if count < max_size:
         buffer.seek(buffer.tell() + (max_size - count) * type_size, File.ABSOLUTE_FILE_POSITION)
 
     return return_list
