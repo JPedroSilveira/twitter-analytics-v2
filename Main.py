@@ -1,11 +1,13 @@
-from Twitter.TwitterCore import TwitterCore
-from Database.TableManeger import TableManeger
 from Data.Tweet import Tweet
-from Data.User import User
+from Database.TableManeger import TableManeger
+from Twitter.TwitterCore import TwitterCore
+
+
 # import nltk
 
 
 def main():
+    print('oi')
     # nltk.download('punkt')
 
     #load_twitter_stream_to_save()

@@ -1,4 +1,3 @@
-import Database.Helpers.ObjectHelper as ObjectHelper
 import Database.Error.ClassError as ClassError
 
 # PRIMITIVE TYPE NAMES

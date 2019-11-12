@@ -1,6 +1,7 @@
+from twython import Twython
+
 from Twitter.TwitterCredentials import Credentials
 from Twitter.TwitterStreamer import AnalitycalTwitterStreamer
-from twython import Twython
 
 
 class TwitterCore:

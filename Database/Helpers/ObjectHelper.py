@@ -1,7 +1,8 @@
 import inspect
+
+import Database.Cons.File as File
 import Database.Cons.SupportedTypes as SupportedTypes
 import Database.Error.ClassError as ClassError
-import Database.Cons.File as File
 
 
 # FUNCTIONS

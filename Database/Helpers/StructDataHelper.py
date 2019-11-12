@@ -1,4 +1,5 @@
 import struct
+
 import Database.Cons.Encode as Encode
 import Database.Cons.SupportedTypes as SupportedTypes
 

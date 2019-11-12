@@ -1,9 +1,9 @@
+import Database.Cons.File as File
+import Database.Cons.FileName as FileName
 import Database.Helpers.DirHelper as DirHelper
+import Database.Helpers.FileIndexHelper as FileIndexHelper
 import Database.Helpers.ObjectHelper as ObjHelper
 import Database.Helpers.ObjectReadWriteHelper as ObjectReadWriteHelper
-import Database.Helpers.FileIndexHelper as FileIndexHelper
-import Database.Cons.FileName as FileName
-import Database.Cons.File as File
 
 
 class TableManeger:

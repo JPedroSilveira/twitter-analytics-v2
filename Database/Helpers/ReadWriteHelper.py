@@ -1,10 +1,12 @@
 import _io
+
 import re
-import Database.Helpers.StructDataHelper as StructDataHelper
-import Database.Helpers.ObjectHelper as ObjectHelper
+
+import Database.Cons.File as File
 import Database.Cons.SupportedTypes as SupportedTypes
 import Database.Error.ReadWriteError as ReadWriteError
-import Database.Cons.File as File
+import Database.Helpers.ObjectHelper as ObjectHelper
+import Database.Helpers.StructDataHelper as StructDataHelper
 
 
 # WRITE FUNCTIONS: WRITE A TYPED VALUE WITH A BUFFER

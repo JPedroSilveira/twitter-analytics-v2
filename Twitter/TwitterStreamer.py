@@ -1,6 +1,7 @@
 from twython import TwythonStreamer
-from Data.Tweet import Tweet
+
 from Data.Hashtag import Hashtag
+from Data.Tweet import Tweet
 from Data.User import User
 from Database.TableManeger import TableManeger
 

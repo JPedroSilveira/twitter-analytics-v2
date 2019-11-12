@@ -1,9 +1,10 @@
 # Return a read value and a bool that says if is the end of the obj
 import _io
+
+import Database.Cons.File as File
+import Database.Cons.SupportedTypes as SupportedTypes
 import Database.Helpers.ObjectHelper as ObjectHelper
 import Database.Helpers.ReadWriteHelper as ReadWriteHelper
-import Database.Cons.SupportedTypes as SupportedTypes
-import Database.Cons.File as File
 
 
 # Write a object starting from the set seek of the buffer

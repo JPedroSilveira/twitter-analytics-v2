@@ -1,6 +1,7 @@
-from unidecode import unidecode
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
+from unidecode import unidecode
+
 from Data.Error.TwitterConversionException import TwitterConversionException
 from Database.Cons import SupportedTypes
 
