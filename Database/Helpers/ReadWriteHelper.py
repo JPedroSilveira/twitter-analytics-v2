@@ -46,15 +46,12 @@ def write_str(buffer: _io.BufferedRandom, value: str, max_size: int):
     value = _remove_invalid_char(value)
 
     for char in value:
-        if stop_count == max_size:
-            break
-
         buffer.write(StructDataHelper.convert_to_bin_char(char))
 
         stop_count = stop_count + 1
 
-    # Write the end of the string
-    buffer.write(StructDataHelper.convert_to_bin_char(SupportedTypes.STRING_END))
+        if stop_count == max_size:
+            break
 
     # Seek the empty space
     if max_size > stop_count:
@@ -195,12 +192,14 @@ def read_str(buffer: _io.BufferedRandom, max_size: int) -> str:
     while char_count < max_size:
         new_char = StructDataHelper.convert_from_bin_char(buffer.read(SupportedTypes.CHAR_SIZE))
 
+        char_count = char_count + 1
+
         # \0 is the end
         if new_char == SupportedTypes.STRING_END:
             break
 
         value = value + new_char
-        char_count = char_count + 1
+
 
     # Place the buffer in the end of the string
     buffer.seek(buffer.tell() + (max_size - char_count) * SupportedTypes.CHAR_SIZE, File.ABSOLUTE_FILE_POSITION)
@@ -238,7 +237,7 @@ def read_list(buffer: _io.BufferedRandom, max_size: int, list_type: str, list_st
         count = count + 1
 
     # Place the buffer in the end of the list
-    if count != max_size:
+    if count < max_size:
         buffer.seek(buffer.tell() + (max_size - count) * type_size, File.ABSOLUTE_FILE_POSITION)
 
     return return_list

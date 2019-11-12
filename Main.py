@@ -8,15 +8,37 @@ from Data.User import User
 def main():
     # nltk.download('punkt')
 
-    #twitter = TwitterCore()
+    #load_twitter_stream_to_save()
 
-    #twitter.stream('Trump', 'en')
-
-    maneger = TableManeger(Tweet)
-
-    maneger.find_by_id(0)
-
-    #maneger.delete_by_id(1)
+    #save_find_delete_test()
 
 
 main()
+
+
+def load_twitter_stream_to_save():
+    twitter = TwitterCore()
+
+    twitter.stream('Trump', 'en')
+
+
+def save_find_delete_test():
+    maneger = TableManeger(Tweet)
+
+    obj_1 = maneger.find_by_id(0)
+
+    obj_2 = maneger.find_by_id(1)
+
+    obj_3 = maneger.find_by_id(2)
+
+    maneger.delete_by_id(1)
+
+    obj_1 = maneger.find_by_id(0)
+
+    obj_2 = maneger.find_by_id(1)
+
+    obj_3 = maneger.find_by_id(2)
+
+    obj_3 = maneger.find_by_id(2)
+
+    return
