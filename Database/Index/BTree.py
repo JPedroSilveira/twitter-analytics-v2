@@ -14,20 +14,20 @@ class BTreeNodeInt:
 
     # Children_id is always a integer, refers to the id of each node
     children_id = []
-    children_id_size = _KEYS_VALUES_ARRAY_SIZE * 2 + 1
+    children_id_size = _KEYS_VALUES_ARRAY_SIZE * 2
     children_id_type = SupportedTypes.INT_NAME
 
     # Keys saved in the tree
     # The keys type depends of each tree objective
     keys = []
-    keys_size = _KEYS_VALUES_ARRAY_SIZE * 2
+    keys_size = _KEYS_VALUES_ARRAY_SIZE * 2 - 1
     keys_type = SupportedTypes.INT_NAME
 
     # Content save the id of the content referenced for each tree
     # The Id type is always a integer because of the id default type in database
     # Each content refer to a key of the same position in the array
     content = []
-    content_size = _KEYS_VALUES_ARRAY_SIZE * 2
+    content_size = _KEYS_VALUES_ARRAY_SIZE * 2 - 1
     content_type = SupportedTypes.INT_NAME
 
     leaf = True
@@ -114,21 +114,22 @@ class BTree:
 
     def insert(self, key, content):
         # If root is full, then tree grows in height
-        if len(key) == _KEYS_VALUES_ARRAY_SIZE * 2:
+        if len(key) == _KEYS_VALUES_ARRAY_SIZE * 2 - 1:
             # Create a new node
             new_node = self.node_class()
             new_node.leaf = False
             # Make the old root a child of new root
             new_node.children_id.append(self.root_id)
             # Split the old root and move 1 key to the new root
-            self.split_child(0, self.root)
+            self.split_child(0, new_node, self.root)
             # New root has two children now.
             # Decide which of the two children is going to have new key
             i = 0
             if new_node.keys[0] < key:
                 i = i + 1
 
-            self.insert_non_full(new_node, key)
+            child = self.get_node_by_id(new_node.keys[i])
+            self.insert_non_full(child, key)
 
             # Save the new node on database
             self.btree_node_table_manager.save(new_node)
@@ -136,9 +137,75 @@ class BTree:
             # Update the root
             self.root = new_node
             self.root_id = new_node.id
+
+            # Save the new tree on database
+            self.btree_table_manager.save(self)
         else:
             self.insert_non_full(self.root, key)
 
+    def insert_non_full(self, node, key):
+        # Initialize index as index of rightmost element
+        i = len(node.keys) - 1
 
-    def split_child(self):
-        return None
+        # If this is a leaf node
+        if node.leaf:
+            # The following loop does two things
+            # a) Finds the location of new key to be inserted
+            # b) Moves all greater keys to one place ahead
+            while i >= 0 and node.keys[i] > key:
+                node.keys[i + 1] = node.keys[i]
+                i = i - 1
+
+            # Insert the new key at found location
+            node.keys[i + 1] = key
+        else:  # If this node is not leaf
+            # Find the child which is going to have the new key
+            while i >= 0 and node.keys[i] > key:
+                i = i - 1
+
+            # See if the found child is full
+            child = self.get_node_by_id(node.children[i + 1])
+            if len(child.keys) == _KEYS_VALUES_ARRAY_SIZE * 2 - 1:
+                # If the child is full, then split it
+                self.split_child(i + 1, node, child)
+
+                # After split, the middle key of children_id[i] goes up and
+                # children_id[i] is splitted into two.  See which of the tw
+                # is going to have the new key
+                if node.keys[i + 1] < key:
+                    i = i + 1
+
+            self.insert_non_full(child, key)
+
+    def split_child(self, i, mother_node, child_node):
+        # Create a new node which is going to store (t-1) keys of y
+        new_node = self.node_class()
+        new_node.leaf = child_node.leaf
+
+        # Copy the last (t-1) keys of y to z
+        for x in range(0, _KEYS_VALUES_ARRAY_SIZE - 1):
+            new_node.keys.append(child_node.keys[x + _KEYS_VALUES_ARRAY_SIZE])
+
+        # Copy the last t children of y to z
+        if not child_node.leaf:
+            for x in range(0, _KEYS_VALUES_ARRAY_SIZE):
+                new_node.children_id[x] = child_node.children_id[x + _KEYS_VALUES_ARRAY_SIZE]
+
+        # Since this node is going to have a new child, create space of new child
+        for x in range(len(mother_node.keys), i + 1, -1):
+            mother_node.children_id[x + 1] = mother_node.children_id[x]
+
+        # Link the new child to this node
+        self.btree_node_table_manager.save(new_node)
+        mother_node.children_id[i + 1] = new_node.id
+
+        # A key of y will move to this node. Find the location of
+        # new key and move all greater keys one space ahead
+        for x in range(len(mother_node.keys) - 1, i, -1):
+            mother_node.keys[x + 1] = mother_node.keys[x]
+
+        # Copy the middle key of y to this node
+        mother_node.keys[i] = mother_node.keys[_KEYS_VALUES_ARRAY_SIZE-1]
+
+
+
