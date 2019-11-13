@@ -10,7 +10,7 @@ def load_twitter_stream_to_save():
     twitter.stream('Trump', 'en')
 
 
-def save_find_update_delete_test():
+def find_update_delete_test():
     manager = TableManager(Tweet)
 
     obj_1 = manager.find_by_id(0)
@@ -36,12 +36,10 @@ def save_find_update_delete_test():
 
 
 def main():
-    print('oi')
     # nltk.download('punkt')
 
-    # load_twitter_stream_to_save()
-
-    # save_find_update_delete_test()
+    #find_update_delete_test()
+    #load_twitter_stream_to_save()
 
 
 main()

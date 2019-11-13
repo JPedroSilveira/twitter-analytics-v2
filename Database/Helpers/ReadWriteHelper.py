@@ -54,6 +54,11 @@ def write_str(buffer: _io.BufferedRandom, value: str, max_size: int):
         if stop_count == max_size:
             break
 
+    # Test size to write end of string
+    if max_size > stop_count:
+        buffer.write(StructDataHelper.convert_to_bin_char(SupportedTypes.STRING_END))
+        stop_count = stop_count + 1
+
     # Seek the empty space
     if max_size > stop_count:
         # Gets the end of the file
@@ -108,7 +113,7 @@ def write_list(buffer: _io.BufferedRandom, values: list, max_size: int, list_typ
 # Write empty values to complete the list size
 def write_list_end_values(
         buffer: _io.BufferedRandom, value_type: str, stop_count: int, max_size: int, string_size: int):
-
+    extra = 0
     if value_type == SupportedTypes.INT_NAME:
         size = SupportedTypes.INT_SIZE
         end = SupportedTypes.INT_END
@@ -124,6 +129,7 @@ def write_list_end_values(
     elif value_type == SupportedTypes.STRING_NAME:
         # Sum one of the string end char
         size = SupportedTypes.CHAR_SIZE * string_size
+        extra = string_size - 1
         end = SupportedTypes.STRING_END
         convert_function = StructDataHelper.convert_to_bin_char
     else:
@@ -133,7 +139,7 @@ def write_list_end_values(
     # Gets the end of the file
     pos = buffer.tell()
     # Then seek to the end of the list max_size and write a end variable
-    buffer.seek(pos + (max_size - stop_count - 1) * size, File.ABSOLUTE_FILE_POSITION)
+    buffer.seek(pos + (max_size - stop_count - 1) * size + extra, File.ABSOLUTE_FILE_POSITION)
     # White a end value
     buffer.write(convert_function(end))
 
@@ -224,7 +230,7 @@ def read_list(buffer: _io.BufferedRandom, max_size: int, list_type: str, list_st
         type_size = SupportedTypes.BOOL_SIZE
     elif list_type == SupportedTypes.STRING_NAME:
         # Plus one of the string end
-        type_size = SupportedTypes.CHAR_SIZE * (list_string_size + 1)
+        type_size = SupportedTypes.CHAR_SIZE * list_string_size
     else:
         raise ReadWriteError.ReadingAListOfInvalidType('The list has this invalid type:' + list_type)
 

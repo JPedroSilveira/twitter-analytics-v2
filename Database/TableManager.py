@@ -8,8 +8,20 @@ import Database.Helpers.ObjectReadWriteHelper as ObjectReadWriteHelper
 
 class TableManager:
 
+    db_class = None
+    db_columns = None
+    class_name = None
+    table_file = None
+
+    # Create and/or manage a table or index
+    def __init__(self, db_class: type, index_name=None):
+        if index_name:
+            self.init_index(db_class, index_name)
+        else:
+            self.init_table(db_class)
+
     # Create and/or manage a table
-    def __init__(self, db_class: type):
+    def init_table(self, db_class: type, index_name=None):
         self.db_class = db_class
         self.db_columns = ObjHelper.get_columns(db_class)
         self.class_name = ObjHelper.get_class_name(db_class)
@@ -17,8 +29,8 @@ class TableManager:
         self.table_file = DirHelper.get_database_file(self.class_name, FileName.TABLE)
         DirHelper.create_file(self.table_file)
 
-    # Create and/or manage a index table
-    def __init__(self, db_class: type, index_name: str):
+    # Create and/or manage a index
+    def init_index(self, db_class: type, index_name: str):
         self.db_class = db_class
         self.db_columns = ObjHelper.get_columns(db_class)
         self.class_name = index_name + File.INDEX_SEPARATOR + ObjHelper.get_class_name(db_class)
