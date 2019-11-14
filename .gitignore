@@ -9,3 +9,6 @@ Twitter/twitter_credentials.json
 
 # Ignore Databases
 *.db
+
+# Ignore Database
+Database\Database
