@@ -4,13 +4,12 @@ from unidecode import unidecode
 
 from Data.Error.TwitterConversionException import TwitterConversionException
 from Database.Cons import SupportedTypes
+from Database.DBData import DBData
 
 _TAG_LIST = ['JJ', 'JJR ', 'JJS', 'NN', 'NNS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
 
 
-class Tweet:
-
-    id = 0
+class Tweet(DBData):
     twitter_id = 0
     user_id = 0
     created_at = ''

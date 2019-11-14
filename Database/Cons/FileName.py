@@ -3,6 +3,6 @@ TABLE = 'table'
 INDEX = 'index'
 
 # INDEX NAMES
-INDEX_MANAGER = '_index_main'
-INDEX_DATA = '_index_data'
+INDEX_MANAGER = 'main'
+INDEX_DATA = 'data'
 INDEX_SEPARATOR = '__'

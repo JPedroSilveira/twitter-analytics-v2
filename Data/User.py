@@ -1,9 +1,8 @@
 from Data.Error.TwitterConversionException import TwitterConversionException
+from Database.DBData import DBData
 
 
-class User:
-
-    id = 0
+class User(DBData):
     twitter_id = 0
     name = ''
     name_size = 100

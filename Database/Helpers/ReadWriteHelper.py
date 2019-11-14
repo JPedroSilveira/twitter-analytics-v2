@@ -22,7 +22,7 @@ def write_primitive_value(buffer: _io.BufferedRandom, value):
         write_bool(buffer, value)
 
     else:
-        raise ReadWriteError.WritingANonPrimitiveType('Value ' + value + ' can\'t be a non primitive type!')
+        raise ReadWriteError.WritingANonPrimitiveType('Value can\'t be a non primitive type!')
 
 
 def write_complex_value(buffer: _io.BufferedRandom, values, size, list_type=None, list_type_size=None):
@@ -129,7 +129,7 @@ def write_list_end_values(
     elif value_type == SupportedTypes.STRING_NAME:
         # Sum one of the string end char
         size = SupportedTypes.CHAR_SIZE * string_size
-        extra = string_size - 1
+        extra = (string_size - 1) * SupportedTypes.CHAR_SIZE
         end = SupportedTypes.STRING_END
         convert_function = StructDataHelper.convert_to_bin_char
     else:

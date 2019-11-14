@@ -1,7 +1,8 @@
-import nltk
 from Data.Tweet import Tweet
 from Database.TableManager import TableManager
 from Twitter.TwitterCore import TwitterCore
+from Database.Index.BTree.BTree import BTree
+from Database.Index.BTree.BTreeNode import BTreeNodeInt
 
 
 def load_twitter_stream_to_save():
@@ -36,10 +37,15 @@ def find_update_delete_test():
 
 
 def main():
-    # nltk.download('punkt')
+ # nltk.download('punkt')
 
     #find_update_delete_test()
     #load_twitter_stream_to_save()
 
+    teste = BTree('tweet_id', BTreeNodeInt, Tweet)
+
+    teste2 = BTree('tweet_id', BTreeNodeInt, Tweet)
+
+    teste3 = BTree('tweet_id', BTreeNodeInt, Tweet)
 
 main()
