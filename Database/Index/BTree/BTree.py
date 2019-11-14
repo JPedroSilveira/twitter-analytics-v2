@@ -1,4 +1,4 @@
-from Database.DBData import DBData
+from Database.Index.BTree import BTreeCons
 from Database.Index.BTree.BTreeInfo import BTreeInfo
 from Database.TableManager import TableManager
 from Database.Cons import FileName
@@ -64,7 +64,19 @@ class BTree:
 
     # Return the id of the object with the key
     def search(self, key) -> int:
-        node = self.root
+        search_return = self._search(key)
+
+        # If find return the content
+        if search_return[1]:
+            return search_return[0]
+        else:  # If not return None
+            return None
+
+    # Search for the key
+    # If find: return the content and true
+    # If not: return the last node and false
+    def _search(self, key) -> (object, bool):
+        node = self.btree_info.root
 
         position = 0
 
@@ -72,17 +84,21 @@ class BTree:
         # If key found return the id referenced by the key
         # Else return None
         while True:
-            # Find the first key greater than or equal to key
+            # Find the first key smaller or equal than key
             while position < len(node.keys) and key > node.keys[position]:
-                i = i + 1
+                position = position + 1
 
-            if node.keys[i] == key:
-                return node.content[i]
+            # Verify if the key found is equal
+            # If true return the content of this key
+            if node.keys[position] == key:
+                return node.content[position], True
 
+            # Verify if the node is a leaf, if true the search ends without find the key
             if node.leaf:
-                return None
+                return node, False
 
-            node = self.get_node_by_id(node.children_id)
+            # Continue the search in the child
+            node = self.get_node_by_id(node.children.ids[position])
 
     def get_node_by_id(self, node_id: int) -> object:
         return self.btree_node_table_manager.find_by_id(node_id)
@@ -91,35 +107,44 @@ class BTree:
         # Get the root node
         root = self.btree_info.root
 
-        # If root is full, then tree grows in height
-        if len(root.keys) == BTreeInfo.KEYS_VALUES_ARRAY_SIZE * 2 - 1:
-            # Create a new node
-            new_node = self.node_class()
-            new_node.leaf = False
-            # Make the old root a child of new root
-            new_node.children_id.append(self.root_id)
-            # Split the old root and move 1 key to the new root
-            self.split_child(0, new_node, self.root)
-            # New root has two children now.
-            # Decide which of the two children is going to have new key
-            i = 0
-            if new_node.keys[0] < key:
-                i = i + 1
-
-            child = self.get_node_by_id(new_node.keys[i])
-            self.insert_non_full(child, key)
-
-            # Save the new node on database
-            self.btree_node_table_manager.save(new_node)
-
-            # Update the root
-            self.root = new_node
-            self.root_id = new_node.id
-
-            # Save the new tree on database
-            self.btree_info_table_manager.save(self)
+        # Verify if the tree is empty
+        if len(root.keys) != 0:
+            self.insert_non_empty(key, content)
         else:
-            self.insert_non_full(self.root, key)
+            self.insert_empty(root, key, content)
+
+    # Insert when the node is not empty
+    def insert_non_empty(self, key, content):
+        leaf_node = self._search(key)
+
+        # If can't insert in the left node
+        if not self.insert_node(leaf_node, key, content):
+            # TO-DO
+        return None
+
+    # Insert in the right place
+    # If success return True
+    # If failure because of space return False
+    def insert_node(self, node, key, content) -> bool:
+        if len(node.keys) == node.keys_size:
+            return False
+        else:
+            count = 0
+            while count < len(node.keys) and key > node.keys[count]:
+                count = count + 1
+
+            # Add the key and the content in the right position in the node lists
+            node.keys = node.keys[0:count] + [key] + node.keys[count:len(node.keys)]
+            node.contents = node.contents[0:count] + [content] + node.contents[count:len(node.contents)]
+            # Save the updated node
+            self.btree_node_table_manager.save(node)
+            return True
+
+    # Insert in the base case, when the node is empty
+    def insert_empty_node(self, node, key, content):
+        node.keys.append(key)
+        node.content.append(content)
+        self.btree_node_table_manager.save(node)
 
     def insert_non_full(self, node, key):
         # Initialize index as index of rightmost element

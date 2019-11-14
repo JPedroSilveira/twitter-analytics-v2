@@ -23,7 +23,7 @@ def find_update_delete_test():
     obj_3.text = 'oi'
     obj_3.test = ['oi', 'tchau']
 
-    manager.update(obj_3)
+    manager.save(obj_3)
 
     manager.delete_by_id(1)
 
@@ -37,7 +37,7 @@ def find_update_delete_test():
 
 
 def main():
- # nltk.download('punkt')
+    # nltk.download('punkt')
 
     #find_update_delete_test()
     #load_twitter_stream_to_save()

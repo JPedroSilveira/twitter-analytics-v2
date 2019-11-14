@@ -47,6 +47,13 @@ class TableManager:
     # Save a new record in the table
     # Return a updated object with database data like id
     def save(self, obj):
+        # If already saved try to update
+        if obj.saved:
+            self._update(obj)
+        else:  # If not save a new registry
+            self._save(obj)
+
+    def _save(self, obj):
         with open(self.table_file, 'ab') as table_file:
             file_tell = table_file.tell()
 
@@ -54,9 +61,10 @@ class TableManager:
         with open(self.table_file, 'r+b') as table_file:
             table_file.seek(file_tell, File.ABSOLUTE_FILE_POSITION)
             obj.id = FileIndexHelper.get_last_id_by_file_end(self.db_class, file_tell)
+            obj.saved = True
             ObjectReadWriteHelper.write_obj(table_file, obj, self.db_class)
 
-    def update(self, obj):
+    def _update(self, obj):
         # Open in append mode
         with open(self.table_file, 'r+b') as table_file:
             seek_pos = FileIndexHelper.calculate_index_by_id(self.db_class, obj.id)
