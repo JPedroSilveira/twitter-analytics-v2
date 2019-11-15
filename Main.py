@@ -1,8 +1,9 @@
 from Data.Tweet import Tweet
+from Data.User import User
 from Database.TableManager import TableManager
 from Twitter.TwitterCore import TwitterCore
 from Database.Index.BTree.BTree import BTree
-from Database.Index.BTree.BTreeNode import BTreeNodeInt
+from Database.Index.BTree.BTreeNode import BTreeNodeFloat
 
 
 def load_twitter_stream_to_save():
@@ -42,10 +43,65 @@ def main():
     #find_update_delete_test()
     #load_twitter_stream_to_save()
 
-    teste = BTree('tweet_id', BTreeNodeInt, Tweet)
+    teste0 = BTree('tweet_id', BTreeNodeFloat, Tweet)
 
-    teste2 = BTree('tweet_id', BTreeNodeInt, Tweet)
+    manager = TableManager(User)
 
-    teste3 = BTree('tweet_id', BTreeNodeInt, Tweet)
+    manager = TableManager(Tweet)
+
+    manager.drop()
+
+    return
+
+    manager = TableManager(Tweet)
+
+    manager.drop()
+
+    return
+
+    teste = BTree('tweet_id', BTreeNodeFloat, Tweet)
+
+    teste.insert(10, 10)
+    teste.insert(20, 20)
+
+    #Split root
+    teste.insert(30, 30)
+
+    teste2 = BTree('tweet_id', BTreeNodeFloat, Tweet)
+
+    teste2.insert(40, 40)
+    teste2.insert(15, 15)
+
+    #Split non root
+    teste2.insert(25, 25)
+
+    teste3 = BTree('tweet_id', BTreeNodeFloat, Tweet)
+
+    # Double Split, one at root
+    teste3.insert(5, 5)
+
+    teste4 = BTree('tweet_id', BTreeNodeFloat, Tweet)
+
+    teste4.insert(24, 24)
+
+    # Split leaf
+    teste4.insert(23, 23)
+
+    teste4.insert(22, 22)
+
+    #Split leaf and parent_node, increase root
+    teste4.insert(21, 21)
+
+    teste4.insert(6, 6)
+
+    # Split leaf
+    teste4.insert(7, 7)
+
+    teste4.insert(4, 4)
+
+    # Split leaf, parent_node and root
+    teste4.insert(3, 3)
+
+    teste5 = BTree('tweet_id', BTreeNodeFloat, Tweet)
 
 main()

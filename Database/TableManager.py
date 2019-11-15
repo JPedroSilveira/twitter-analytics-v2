@@ -4,6 +4,8 @@ import Database.Helpers.DirHelper as DirHelper
 import Database.Helpers.FileIndexHelper as FileIndexHelper
 import Database.Helpers.ObjectHelper as ObjHelper
 import Database.Helpers.ObjectReadWriteHelper as ObjectReadWriteHelper
+from Database import DBData
+from Database.Cons import DBTypes
 
 
 class TableManager:
@@ -13,9 +15,10 @@ class TableManager:
     class_name = None
     ref_class_name = None
     table_file = None
+    type = None
 
     # Create and/or manage a table or index
-    def __init__(self, db_class: type, index_name: str, index_filename: str, ref_class=None):
+    def __init__(self, db_class: type, index_name=None, index_filename=None, ref_class=None):
         if index_name:
             self.init_index(db_class, index_name, index_filename, ref_class)
         else:
@@ -26,6 +29,7 @@ class TableManager:
         self.db_class = db_class
         self.db_columns = ObjHelper.get_columns(db_class)
         self.class_name = ObjHelper.get_class_name(db_class)
+        self.type = DBTypes.TABLE
         DirHelper.create_database_directory(self.class_name)
         self.table_file = DirHelper.get_database_file(self.class_name, FileName.TABLE)
         DirHelper.create_file(self.table_file)
@@ -36,6 +40,7 @@ class TableManager:
         self.db_columns = ObjHelper.get_columns(db_class)
         self.class_name = index_name
         self.ref_class_name = ObjHelper.get_class_name(ref_class)
+        self.type = DBTypes.INDEX
         index_dir = self.ref_class_name + '\\' + FileName.INDEX
         file_dir = index_dir + '\\' + index_name
         DirHelper.create_database_directory(self.ref_class_name)
@@ -64,6 +69,7 @@ class TableManager:
             obj.saved = True
             ObjectReadWriteHelper.write_obj(table_file, obj, self.db_class)
 
+    # Update saved data using the id
     def _update(self, obj):
         # Open in append mode
         with open(self.table_file, 'r+b') as table_file:
@@ -71,16 +77,37 @@ class TableManager:
             table_file.seek(seek_pos, File.ABSOLUTE_FILE_POSITION)
             ObjectReadWriteHelper.write_obj(table_file, obj, self.db_class)
 
+    # Find one item by id
     def find_by_id(self, obj_id: int) -> object:
-        with open(self.table_file, 'rb') as table_file:
-            seek_pos = FileIndexHelper.calculate_index_by_id(self.db_class, obj_id)
-            table_file.seek(seek_pos, File.ABSOLUTE_FILE_POSITION)
-            obj = ObjectReadWriteHelper.read_obj(table_file, self.db_class)
-            # TO-DO: Erro ao salvar BTree main
-        return obj
+        if obj_id >= 0:
+            with open(self.table_file, 'rb') as table_file:
+                seek_pos = FileIndexHelper.calculate_index_by_id(self.db_class, obj_id)
+                table_file.seek(seek_pos, File.ABSOLUTE_FILE_POSITION)
+                obj = ObjectReadWriteHelper.read_obj(table_file, self.db_class)
+                # TO-DO: Erro ao salvar BTree main
+            return obj
+        return None
 
-    def delete_by_id(self, obj_id: int) -> object:
-        with open(self.table_file, 'r+b') as table_file:
-            seek_pos = FileIndexHelper.calculate_index_by_id(self.db_class, obj_id)
-            table_file.seek(seek_pos, File.ABSOLUTE_FILE_POSITION)
-            ObjectReadWriteHelper.delete_obj(table_file)
+    # Delete one item by id
+    def delete(self, obj: DBData):
+        if obj.id >= 0:
+            with open(self.table_file, 'r+b') as table_file:
+                seek_pos = FileIndexHelper.calculate_index_by_id(self.db_class, obj.id)
+                table_file.seek(seek_pos, File.ABSOLUTE_FILE_POSITION)
+                ObjectReadWriteHelper.delete_obj(table_file)
+
+    # Drop all table if the instance type is a table or delete only the index if the instance type is an index
+    def drop(self):
+        if self.type == DBTypes.TABLE:
+            self._drop_table()
+        else:
+            self._drop_index()
+
+    # Drop a table and its contents, including indexes
+    def _drop_table(self):
+        DirHelper.delete_table_directory(self.class_name)
+
+    # Drop an index
+    def _drop_index(self):
+        index_dir = self.ref_class_name + '\\' + FileName.INDEX
+        DirHelper.delete_table_directory(index_dir)

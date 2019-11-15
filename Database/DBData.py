@@ -1,4 +1,4 @@
-class DBData:
+class DBData(object):
     id = 0
     saved = False
 

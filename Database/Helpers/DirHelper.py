@@ -1,8 +1,8 @@
 import os
+import shutil
 
-_ROOT_DIR = "Database"
 _DIRECTORY_SEPARATOR = "\\"
-_DATABASE_DIR = "Database"
+_DATABASE_DIR = "PyDatabase"
 _TYPE_OF_TABLE_FILE = ".dbt"
 
 
@@ -10,7 +10,7 @@ _TYPE_OF_TABLE_FILE = ".dbt"
 
 # Return the master database dir
 def get_database_dir() -> str:
-    return "." + _DIRECTORY_SEPARATOR + _ROOT_DIR + _DIRECTORY_SEPARATOR + _DATABASE_DIR
+    return "." + _DIRECTORY_SEPARATOR + _DATABASE_DIR
 
 
 # Return the file of a table using its name
@@ -21,6 +21,13 @@ def get_database_file(class_name: str, file_name: str) -> str:
 # Return the folder of a database class
 def get_class_database_dir(class_name: str) -> str:
     return get_database_dir() + _DIRECTORY_SEPARATOR + class_name
+
+
+# Delete the master directory if exists
+def delete_table_directory(class_name: str):
+    class_dir = get_class_database_dir(class_name)
+    if os.path.exists(class_dir):
+        shutil.rmtree(class_dir)
 
 
 # Create the master and class folder if not exists
@@ -38,4 +45,3 @@ def create_file(file_name: str):
     if not os.path.exists(file_name):
         buffer = open(file_name, 'w')
         buffer.close()
-
