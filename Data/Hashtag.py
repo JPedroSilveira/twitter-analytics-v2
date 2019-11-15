@@ -1,9 +1,8 @@
 from Data.Error.TwitterConversionException import TwitterConversionException
+from Database.DBData import DBData
 
 
-class Hashtag:
-
-    id = 0
+class Hashtag(DBData):
     text = ''
     text_size = 100
 

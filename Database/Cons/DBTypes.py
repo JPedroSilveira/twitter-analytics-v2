@@ -1,0 +1,2 @@
+TABLE = 'table'
+INDEX = 'index'

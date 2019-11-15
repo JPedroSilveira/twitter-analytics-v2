@@ -3,26 +3,6 @@ class Error(Exception):
     pass
 
 
-class ListOrStringWithoutSizeException(Error):
-    """The give class has a string without a _size defined"""
-    pass
-
-
-class AttributeWithoutSizeException(Error):
-    """The attribute doesn't have a size sub attribute"""
-    pass
-
-
-class ObjClassAndColumnAreNecessaryToGetAttributeSizeOfAStringList(Error):
-    """Object Class and Column passed as None, it can't happen when you are getting the string size of a string list!"""
-    pass
-
-
-class TryingToSearchForANotSupportedAttributeSize(Error):
-    """Typed searched are not supported!"""
-    pass
-
-
 class AttributeNotFound(Error):
     """Attribute not found in the class"""
     pass
