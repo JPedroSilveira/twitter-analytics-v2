@@ -64,8 +64,8 @@ class BTreeTest(unittest.TestCase):
         btree.insert(obj1.external_id, obj1.id)
         btree.insert(obj2.external_id, obj2.id)
 
-        obj1_id = btree.search(obj1.external_id)
-        obj2_id = btree.search(obj2.external_id)
+        obj1_id = btree.find(obj1.external_id)
+        obj2_id = btree.find(obj2.external_id)
 
         manager.drop()
 
@@ -85,8 +85,8 @@ class BTreeTest(unittest.TestCase):
         btree.insert(obj1.unique_name, obj1.id)
         btree.insert(obj2.unique_name, obj2.id)
 
-        obj1_id = btree.search(obj1.unique_name)
-        obj2_id = btree.search(obj2.unique_name)
+        obj1_id = btree.find(obj1.unique_name)
+        obj2_id = btree.find(obj2.unique_name)
 
         manager.drop()
 
@@ -109,9 +109,9 @@ class BTreeTest(unittest.TestCase):
         btree.insert(obj2.external_id, obj2.id)
         btree.insert(obj3.external_id, obj3.id)
 
-        obj1_id = btree.search(obj1.external_id)
-        obj2_id = btree.search(obj2.external_id)
-        obj3_id = btree.search(obj3.external_id)
+        obj1_id = btree.find(obj1.external_id)
+        obj2_id = btree.find(obj2.external_id)
+        obj3_id = btree.find(obj3.external_id)
 
         manager.drop()
 
@@ -156,16 +156,16 @@ class BTreeTest(unittest.TestCase):
         btree.insert(obj9.external_id, obj9.id)
         btree.insert(obj10.external_id, obj10.id)
 
-        obj1_id = btree.search(obj1.external_id)
-        obj2_id = btree.search(obj2.external_id)
-        obj3_id = btree.search(obj3.external_id)
-        obj4_id = btree.search(obj4.external_id)
-        obj5_id = btree.search(obj5.external_id)
-        obj6_id = btree.search(obj6.external_id)
-        obj7_id = btree.search(obj7.external_id)
-        obj8_id = btree.search(obj8.external_id)
-        obj9_id = btree.search(obj9.external_id)
-        obj10_id = btree.search(obj10.external_id)
+        obj1_id = btree.find(obj1.external_id)
+        obj2_id = btree.find(obj2.external_id)
+        obj3_id = btree.find(obj3.external_id)
+        obj4_id = btree.find(obj4.external_id)
+        obj5_id = btree.find(obj5.external_id)
+        obj6_id = btree.find(obj6.external_id)
+        obj7_id = btree.find(obj7.external_id)
+        obj8_id = btree.find(obj8.external_id)
+        obj9_id = btree.find(obj9.external_id)
+        obj10_id = btree.find(obj10.external_id)
 
         manager.drop()
 
@@ -193,7 +193,7 @@ class BTreeTest(unittest.TestCase):
             obj_list.append(obj)
 
         for obj in obj_list:
-            obj_id = btree.search(obj.external_id)
+            obj_id = btree.find(obj.external_id)
             self.assertEqual(obj.id, obj_id)
 
         manager.drop()
@@ -211,7 +211,7 @@ class BTreeTest(unittest.TestCase):
             obj_list.append(obj)
 
         for obj in obj_list:
-            obj_id = btree.search(obj.external_id)
+            obj_id = btree.find(obj.external_id)
             self.assertEqual(obj.id, obj_id)
 
         manager.drop()
@@ -229,7 +229,7 @@ class BTreeTest(unittest.TestCase):
             obj_list.append(obj)
 
         for obj in obj_list:
-            obj_id = btree.search(obj.external_id)
+            obj_id = btree.find(obj.external_id)
             self.assertEqual(obj.id, obj_id)
 
         manager.drop()
@@ -250,7 +250,7 @@ class BTreeTest(unittest.TestCase):
             obj_list.append(obj)
 
         for obj in obj_list:
-            obj_id = btree.search(obj.unique_name)
+            obj_id = btree.find(obj.unique_name)
             self.assertEqual(obj.id, obj_id)
 
         manager.drop()
@@ -275,7 +275,7 @@ class BTreeTest(unittest.TestCase):
             count = count + 1
 
         for obj in obj_list:
-            obj_id = btree.search(obj.external_id)
+            obj_id = btree.find(obj.external_id)
             self.assertEqual(obj.id, obj_id)
 
         manager.drop()
@@ -295,8 +295,8 @@ class BTreeTest(unittest.TestCase):
         # Delete the bigger
         btree.delete(1)
 
-        obj_id_1 = btree.search(0)
-        obj_id_2 = btree.search(1)
+        obj_id_1 = btree.find(0)
+        obj_id_2 = btree.find(1)
         manager.drop()
         self.assertEqual(None, obj_id_1)
         self.assertEqual(None, obj_id_2)
@@ -320,10 +320,10 @@ class BTreeTest(unittest.TestCase):
         # Delete the last value of an intern above a leaf
         btree.delete(3)
 
-        obj_id_1 = btree.search(0)
-        obj_id_2 = btree.search(1)
-        obj_id_3 = btree.search(5)
-        obj_id_4 = btree.search(3)
+        obj_id_1 = btree.find(0)
+        obj_id_2 = btree.find(1)
+        obj_id_3 = btree.find(5)
+        obj_id_4 = btree.find(3)
         manager.drop()
         self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4)
 
@@ -350,12 +350,12 @@ class BTreeTest(unittest.TestCase):
         # Delete the last value of an intern above another intern
         btree.delete(11)
 
-        obj_id_1 = btree.search(0)
-        obj_id_2 = btree.search(1)
-        obj_id_3 = btree.search(5)
-        obj_id_4 = btree.search(3)
-        obj_id_5 = btree.search(7)
-        obj_id_6 = btree.search(11)
+        obj_id_1 = btree.find(0)
+        obj_id_2 = btree.find(1)
+        obj_id_3 = btree.find(5)
+        obj_id_4 = btree.find(3)
+        obj_id_5 = btree.find(7)
+        obj_id_6 = btree.find(11)
         manager.drop()
         self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4 or obj_id_5 or obj_id_6)
 
@@ -387,14 +387,14 @@ class BTreeTest(unittest.TestCase):
         # Delete from root
         btree.delete(23)
 
-        obj_id_1 = btree.search(0)
-        obj_id_2 = btree.search(1)
-        obj_id_3 = btree.search(5)
-        obj_id_4 = btree.search(3)
-        obj_id_5 = btree.search(7)
-        obj_id_6 = btree.search(11)
-        obj_id_7 = btree.search(15)
-        obj_id_8 = btree.search(23)
+        obj_id_1 = btree.find(0)
+        obj_id_2 = btree.find(1)
+        obj_id_3 = btree.find(5)
+        obj_id_4 = btree.find(3)
+        obj_id_5 = btree.find(7)
+        obj_id_6 = btree.find(11)
+        obj_id_7 = btree.find(15)
+        obj_id_8 = btree.find(23)
         manager.drop()
         self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4 or obj_id_5
                          or obj_id_6 or obj_id_7 or obj_id_8)
@@ -409,7 +409,7 @@ class BTreeTest(unittest.TestCase):
 
         btree.delete(0)
 
-        obj_id_1 = btree.search(0)
+        obj_id_1 = btree.find(0)
 
         manager.drop()
         self.assertEqual(None, obj_id_1)
@@ -449,10 +449,10 @@ class BTreeTest(unittest.TestCase):
         # Delete from root
         btree.delete(14)
 
-        obj_id_1 = btree.search(21)
-        obj_id_2 = btree.search(17)
-        obj_id_3 = btree.search(19)
-        obj_id_4 = btree.search(14)
+        obj_id_1 = btree.find(21)
+        obj_id_2 = btree.find(17)
+        obj_id_3 = btree.find(19)
+        obj_id_4 = btree.find(14)
         manager.drop()
         self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4)
 

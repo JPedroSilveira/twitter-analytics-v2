@@ -23,7 +23,7 @@ class BTree:
             self._create_root()
 
     # Return the id of the object with the key
-    def search(self, key) -> int:
+    def find(self, key) -> int:
         node, position, found = self._search(key)
 
         # If find return the content
@@ -570,11 +570,11 @@ class BTree:
             if position < len(node.keys) and node.keys[position] == key:
                 return node, position, True
 
-            # Verify if the node is a leaf, if true the search ends without find the key
+            # Verify if the node is a leaf, if true the find ends without find the key
             if self._is_leaf(node):
                 return node, None, False
 
-            # Continue the search in the child
+            # Continue the find in the child
             node = self._get_node_by_id(node.children_ids[position])
             position = 0
 

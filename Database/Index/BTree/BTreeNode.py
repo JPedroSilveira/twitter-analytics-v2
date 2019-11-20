@@ -44,11 +44,33 @@ class BTreeNodeInt(BTreeNode):
         return SupportedTypes.INT_NAME
 
 
-# Node with integer keys
+# Node with string keys
 class BTreeNode50String(BTreeNode):
     # Defines the key type of BTreeNode
     keys_type = SupportedTypes.STRING_NAME
     keys_size_string = 50
+
+    # Defines the sized based in the degree
+    children_ids_size = BTreeCons.STRING50_BREE_DEGREE
+    keys_size = BTreeCons.STRING50_BREE_DEGREE - 1
+    contents_size = BTreeCons.STRING50_BREE_DEGREE - 1
+
+    def __init__(self):
+        self.children_ids = []
+        self.keys = []
+        self.contents = []
+
+    # Function to get the node type
+    @staticmethod
+    def get_node_type():
+        return SupportedTypes.STRING_NAME
+
+
+# Node with string keys
+class BTreeNode280String(BTreeNode):
+    # Defines the key type of BTreeNode
+    keys_type = SupportedTypes.STRING_NAME
+    keys_size_string = 280
 
     # Defines the sized based in the degree
     children_ids_size = BTreeCons.STRING50_BREE_DEGREE

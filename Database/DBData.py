@@ -1,5 +1,5 @@
 class DBData(object):
-    id = 0
+    id = -1
     saved = False
 
     # Used for do some stuff after database load

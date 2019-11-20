@@ -10,7 +10,7 @@ _TAG_LIST = ['JJ', 'JJR ', 'JJS', 'NN', 'NNS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 
 
 
 class Tweet(DBData):
-    twitter_id = 0
+    tweet_id = 0
     user_id = 0
     created_at = ''
     created_at_size = 50
@@ -18,14 +18,10 @@ class Tweet(DBData):
     text_size = 280
     filtered_text = ''
     filtered_text_size = 280
-    test = []
-    test_size = 4
-    test_size_string = 6
-    test_type = SupportedTypes.STRING_NAME
 
     def save_data(self, tweet_data):
         try:
-            self.twitter_id = tweet_data['id']
+            self.tweet_id = tweet_data['id']
             self.text = unidecode(tweet_data['text'])
             self.created_at = tweet_data['created_at']
             self.filter_text()

@@ -4,7 +4,7 @@ from Database.DBData import DBData
 
 class Hashtag(DBData):
     text = ''
-    text_size = 100
+    text_size = 280
 
     def save_data(self, hashtag_data):
         try:
