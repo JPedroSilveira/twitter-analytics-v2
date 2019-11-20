@@ -280,6 +280,136 @@ class BTreeTest(unittest.TestCase):
 
         manager.drop()
 
+    def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_from_leaf(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
+
+        obj_list = []
+
+        for x in range(0, 31):
+            obj = TestIntClass(x)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            obj_list.append(obj)
+
+        # Delete leaf nodes
+        # Delete the smallest
+        btree.delete(0)
+        # Delete the bigger
+        btree.delete(1)
+
+        obj_id_1 = btree.search(0)
+        obj_id_2 = btree.search(1)
+        manager.drop()
+        self.assertEqual(None, obj_id_1)
+        self.assertEqual(None, obj_id_2)
+
+    def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_from_leaf_and_intern(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
+
+        obj_list = []
+
+        for x in range(0, 31):
+            obj = TestIntClass(x)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            obj_list.append(obj)
+
+        # Delete leaf nodes
+        # Delete the smallest
+        btree.delete(0)
+        # Delete the bigger
+        btree.delete(1)
+        # Delete intern above a leaf
+        btree.delete(5)
+        # Delete the last value of an intern above a leaf
+        btree.delete(3)
+
+        obj_id_1 = btree.search(0)
+        obj_id_2 = btree.search(1)
+        obj_id_3 = btree.search(5)
+        obj_id_4 = btree.search(3)
+        manager.drop()
+        self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4)
+
+    def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_from_leaf_and_intern_with_intern_child(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
+
+        obj_list = []
+
+        for x in range(0, 31):
+            obj = TestIntClass(x)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            obj_list.append(obj)
+
+        # Delete leaf nodes
+        # Delete the smallest
+        btree.delete(0)
+        # Delete the bigger
+        btree.delete(1)
+        # Delete intern above a leaf
+        btree.delete(5)
+        # Delete the last value of an intern above a leaf
+        btree.delete(3)
+        # Delete one of the values of an intern above another intern
+        btree.delete(7)
+        # Delete the last value of an intern above another intern
+        btree.delete(11)
+
+        obj_id_1 = btree.search(0)
+        obj_id_2 = btree.search(1)
+        obj_id_3 = btree.search(5)
+        obj_id_4 = btree.search(3)
+        obj_id_5 = btree.search(7)
+        obj_id_6 = btree.search(11)
+        manager.drop()
+        self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4 or obj_id_5 or obj_id_6)
+
+    def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_from_root(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
+
+        obj_list = []
+
+        for x in range(0, 31):
+            obj = TestIntClass(x)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            obj_list.append(obj)
+
+        # Delete leaf nodes
+        # Delete the smallest
+        btree.delete(0)
+        # Delete the bigger
+        btree.delete(1)
+        # Delete intern above a leaf
+        btree.delete(5)
+        # Delete the last value of an intern above a leaf
+        btree.delete(3)
+        # Delete one of the values of an intern above another intern
+        btree.delete(7)
+        # Delete the last value of an intern above another intern
+        btree.delete(11)
+        # Delete from root
+        btree.delete(15)
+        # Delete from root
+        btree.delete(23)
+
+        obj_id_1 = btree.search(0)
+        obj_id_2 = btree.search(1)
+        obj_id_3 = btree.search(5)
+        obj_id_4 = btree.search(3)
+        obj_id_5 = btree.search(7)
+        obj_id_6 = btree.search(11)
+        obj_id_7 = btree.search(15)
+        obj_id_8 = btree.search(23)
+        manager.drop()
+        self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4 or obj_id_5
+                         or obj_id_6 or obj_id_7 or obj_id_8)
+
 
 if __name__ == '__main__':
     unittest.main()

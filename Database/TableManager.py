@@ -84,7 +84,6 @@ class TableManager:
                 seek_pos = FileIndexHelper.calculate_index_by_id(self.db_class, obj_id)
                 table_file.seek(seek_pos, File.ABSOLUTE_FILE_POSITION)
                 obj = ObjectReadWriteHelper.read_obj(table_file, self.db_class)
-                # TO-DO: Erro ao salvar BTree main
             return obj
         return None
 
