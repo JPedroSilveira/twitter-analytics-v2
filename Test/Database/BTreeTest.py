@@ -284,13 +284,10 @@ class BTreeTest(unittest.TestCase):
         manager = TableManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
-        obj_list = []
-
         for x in range(0, 31):
             obj = TestIntClass(x)
             manager.save(obj)
             btree.insert(obj.external_id, obj.id)
-            obj_list.append(obj)
 
         # Delete leaf nodes
         # Delete the smallest
@@ -308,13 +305,10 @@ class BTreeTest(unittest.TestCase):
         manager = TableManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
-        obj_list = []
-
         for x in range(0, 31):
             obj = TestIntClass(x)
             manager.save(obj)
             btree.insert(obj.external_id, obj.id)
-            obj_list.append(obj)
 
         # Delete leaf nodes
         # Delete the smallest
@@ -337,13 +331,10 @@ class BTreeTest(unittest.TestCase):
         manager = TableManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
-        obj_list = []
-
         for x in range(0, 31):
             obj = TestIntClass(x)
             manager.save(obj)
             btree.insert(obj.external_id, obj.id)
-            obj_list.append(obj)
 
         # Delete leaf nodes
         # Delete the smallest
@@ -368,17 +359,15 @@ class BTreeTest(unittest.TestCase):
         manager.drop()
         self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4 or obj_id_5 or obj_id_6)
 
+
     def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_from_root(self):
         manager = TableManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
-
-        obj_list = []
 
         for x in range(0, 31):
             obj = TestIntClass(x)
             manager.save(obj)
             btree.insert(obj.external_id, obj.id)
-            obj_list.append(obj)
 
         # Delete leaf nodes
         # Delete the smallest
@@ -409,6 +398,97 @@ class BTreeTest(unittest.TestCase):
         manager.drop()
         self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4 or obj_id_5
                          or obj_id_6 or obj_id_7 or obj_id_8)
+
+    def test_btree_int_insert_and_delete_from_root(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
+
+        obj = TestIntClass(0)
+        manager.save(obj)
+        btree.insert(obj.external_id, obj.id)
+
+        btree.delete(0)
+
+        obj_id_1 = btree.search(0)
+
+        manager.drop()
+        self.assertEqual(None, obj_id_1)
+
+    def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_middle_values(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
+
+        for x in range(0, 31):
+            obj = TestIntClass(x)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+
+        # Delete leaf nodes
+        # Delete the smallest
+        btree.delete(0)
+        # Delete the bigger
+        btree.delete(1)
+        # Delete intern above a leaf
+        btree.delete(5)
+        # Delete the last value of an intern above a leaf
+        btree.delete(3)
+        # Delete one of the values of an intern above another intern
+        btree.delete(7)
+        # Delete the last value of an intern above another intern
+        btree.delete(11)
+        # Delete from root
+        btree.delete(15)
+        # Delete from root
+        btree.delete(23)
+        # Delete from root
+        btree.delete(21)
+        # Delete from root
+        btree.delete(17)
+        # Delete from root
+        btree.delete(19)
+        # Delete from root
+        btree.delete(14)
+
+        obj_id_1 = btree.search(21)
+        obj_id_2 = btree.search(17)
+        obj_id_3 = btree.search(19)
+        obj_id_4 = btree.search(14)
+        manager.drop()
+        self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4)
+
+    def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_all_in_desc_order(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
+
+        for x in range(0, 31):
+            obj = TestIntClass(x)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+
+        for x in range(30, -1, -1):
+            btree.delete(x)
+
+        obj_id = btree.find_smallest()
+
+        manager.drop()
+        self.assertEqual(None, obj_id)
+
+    def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_all_in_asc_order(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
+
+        for x in range(0, 31):
+            obj = TestIntClass(x)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+
+        for x in range(0, 31):
+            btree.delete(x)
+
+        obj_id = btree.find_smallest()
+
+        manager.drop()
+        self.assertEqual(None, obj_id)
 
 
 if __name__ == '__main__':

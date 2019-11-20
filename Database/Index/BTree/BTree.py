@@ -35,7 +35,7 @@ class BTree:
     # Insert and update a key with it's content
     def insert(self, key, content):
         # Get the root node
-        root = self.btree_node_table_manager.find_by_id(self.b)
+        root = self._get_root()
 
         # Verify if the tree is empty
         if len(root.keys) != 0:
@@ -54,6 +54,15 @@ class BTree:
             return self._delete_by_key(key)
         else:
             return False
+
+    # Return the smallest value
+    def find_smallest(self):
+        node = self._get_predecessor_child(self._get_root(), 0)
+
+        if node is not None and len(node.contents) > 0:
+            return node.contents[0]
+        else:
+            return None
 
     # Drop all index data
     def drop(self):
@@ -161,8 +170,9 @@ class BTree:
         node.contents = node.contents[0:position] + [content] + node.contents[position:len(node.contents)]
 
     # Update the children's parent_id of a node
-    def _update_children_id(self, node):
-        for child_id in node.children_ids:
+    def _update_children_id(self, node, ex_node=None):
+        parent_node = ex_node or node
+        for child_id in parent_node.children_ids:
             child_node = self._get_node_by_id(child_id)
             child_node.parent_id = node.id
             self.btree_node_table_manager.save(child_node)
@@ -236,7 +246,7 @@ class BTree:
     def _delete_key_from_node_by_position(self, node, position):
         # Case 1: Node is leaf
         if self._is_leaf(node):
-            if not self._has_minimum_size(node):
+            if self._is_root(node) or not self._has_minimum_size(node):
                 # Case 1.a: node is a leaf and has more keys than the min
                 # Just remove the element and save
                 self._delete_key_in_node_and_save(node, position)
@@ -319,7 +329,7 @@ class BTree:
             node.contents = child.contents
             node.children_ids = child.children_ids
 
-            self._update_children_id(node)
+            self._update_children_id(node, child)
 
             self.btree_node_table_manager.save(node)
             self.btree_node_table_manager.delete(child)
@@ -356,6 +366,9 @@ class BTree:
         # Merge nodes
         sibling.keys.extend(node.keys)
         sibling.contents.extend(node.contents)
+        sibling.children_ids.extend(node.children_ids)
+
+        self._update_children_id(sibling, node)
 
         # Remove the id of the node in the parent children_ids
         del parent.children_ids[sibling_position + 1]
@@ -396,7 +409,7 @@ class BTree:
         node.keys.extend(sibling.keys)
         node.contents.extend(sibling.contents)
         node.children_ids.extend(sibling.children_ids)
-        self._update_children_id(node)
+        self._update_children_id(node, sibling)
 
         # Remove the id of the sibling in the parent children_ids
         del parent.children_ids[node_position + 1]
@@ -541,7 +554,7 @@ class BTree:
     # If find: return the node, the position of the content and true
     # If not: return the last node, none and false
     def _search(self, key) -> (object, int, bool):
-        node = self.btree_info.root
+        node = self._get_root()
         position = 0
 
         # Try to find the key in the BTree using the nodes
@@ -584,7 +597,6 @@ class BTree:
         # Update the class data with database info
         self.btree_info = BTreeInfo()
         self.btree_info.root_id = new_root.id
-        self.btree_info.root = new_root
         # Save main in the database
         self.btree_info_table_manager.save(self.btree_info)
 
