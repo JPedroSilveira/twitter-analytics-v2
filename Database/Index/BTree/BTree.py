@@ -1,6 +1,5 @@
 import math
 
-from Database.Error import BTreeError
 from Database.Index.BTree.BTreeInfo import BTreeInfo
 from Database.TableManager import TableManager
 from Database.Cons import FileName
@@ -22,11 +21,28 @@ class BTree:
         if not self._get_btree_info():
             self._create_root()
 
-    # Return the id of the object with the key
-    def find(self, key) -> int:
-        node, position, found = self._search(key)
+    # Return a list of the contents with the key
+    def find(self, key) -> list:
+        root = self._get_root()
+        results, found = self._deep_search_by_key(root, key)
+        contents = []
+        # If found return the contents
+        if found:
+            for result in results:
+                node = result[0]
+                for position in result[1]:
+                    contents.append(node.contents[position])
 
-        # If find return the content
+            return contents
+        else:  # If not return None
+            return None
+
+    # Return the id of the object with the key and content
+    def find_with_key_and_content(self, key, content) -> list:
+        root = self._get_root()
+        node, position, found = self._deep_search_by_key_and_content(root, key, content)
+
+        # If found return the content
         if found:
             return node.contents[position]
         else:  # If not return None
@@ -45,13 +61,13 @@ class BTree:
 
     # Delete the key and it's content from BTree
     # Return True in success and False if key doesn't exists
-    def delete(self, key) -> bool:
+    def delete(self, key, content) -> bool:
         # Get the root node
         root = self._get_root()
 
         # Verify if the tree is empty
         if len(root.keys) != 0:
-            return self._delete_by_key(key)
+            return self._delete_by_key_and_content(key, content)
         else:
             return False
 
@@ -73,14 +89,9 @@ class BTree:
 
     # Insert when the node is not empty
     def _insert_non_empty_node(self, key, content):
-        node, position, found = self._search(key)
+        node, found = self._search(key)
 
-        # Just insert not existent keys
-        if not found:
-            self._insert_leaf_node(node, key, content)
-        else:  # If found update the content value
-            node.contents[position] = content
-            self.btree_node_table_manager.save(node)
+        self._insert_leaf_node(node, key, content)
 
     # Split the node and insert in the right position
     def _split_node(self, node):
@@ -232,8 +243,9 @@ class BTree:
 
     # Find the node of the key and delete respecting BTree rules
     # Return True if the key exists and False if not
-    def _delete_by_key(self, key) -> bool:
-        node, position, found = self._search(key)
+    def _delete_by_key_and_content(self, key, content) -> bool:
+        root = self._get_root()
+        node, position, found = self._deep_search_by_key_and_content(root, key, content)
 
         # Just insert not existent keys
         if found:
@@ -537,11 +549,11 @@ class BTree:
         if successor is None:
             return None
 
-        while not self._is_leaf(predecessor):
-            smallest_child_id = predecessor.children_ids[0]
-            predecessor = self._get_node_by_id(smallest_child_id)
+        while not self._is_leaf(successor):
+            smallest_child_id = successor.children_ids[0]
+            successor = self._get_node_by_id(smallest_child_id)
 
-        return predecessor
+        return successor
 
     # Return the parent of a node
     def _get_parent(self, node):
@@ -551,32 +563,142 @@ class BTree:
     # BTree internal functions
 
     # Search for the key
-    # If find: return the node, the position of the content and true
+    # If find: return the node with the leftest occurrence, the position of the content and true
     # If not: return the last node, none and false
-    def _search(self, key) -> (object, int, bool):
+    def _search(self, key) -> (object, bool):
         node = self._get_root()
-        position = 0
-
         # Try to find the key in the BTree using the nodes
         # If key found return the id referenced by the key
         # Else return None
         while True:
+            go_out = False
+            position = 0
+
             # Find the first key smaller or equal than key
             while position < len(node.keys) and key > node.keys[position]:
                 position = position + 1
 
-            # Verify if the key found is equal
-            # If true return the content of this key
+            # If key found
             if position < len(node.keys) and node.keys[position] == key:
-                return node, position, True
+                # Search for the last occurrence
+                while position < len(node.keys) and key > node.keys[position]:
+                    position = position + 1
 
-            # Verify if the node is a leaf, if true the find ends without find the key
+                if not self._is_leaf(node):
+                    temp_node = self._get_node_by_id(node.children_ids[position])
+
+                    if not self._is_leaf(temp_node):
+                        node = temp_node
+                        go_out = True
+                    else:
+                        return temp_node, True
+                else:
+                    return node, True
+
+            if not go_out:
+                # Verify if the node is a leaf, if true the find ends without find the key
+                if self._is_leaf(node):
+                    return node, False
+
+                # Continue the find in the child
+                node = self._get_node_by_id(node.children_ids[position])
+
+    # Find a node with the key and content and return the node and the key position
+    def _deep_search_by_key_and_content(self, node, key, content) -> (object, int, bool):
+        positions = []
+        position = 0
+        # Find the first occurrences
+        while True and node is not None:
+
+            # Find all occurrences of the key in node
+            while position < len(node.keys) and key >= node.keys[position]:
+                # If found the key stop
+                if key == node.keys[position]:
+                    if node.contents[position] == content:
+                        return node, position, True
+
+                    # Leaf haven't child to search
+                    if not self._is_leaf(node):
+                        positions.append(position)
+
+                position = position + 1
+
+            # Verify if the node is a leaf
             if self._is_leaf(node):
                 return node, None, False
+            elif len(positions) == 0:
+                # Continue the find in the child
+                node = self._get_node_by_id(node.children_ids[position])
+                position = 0
+            else:
+                break
 
-            # Continue the find in the child
-            node = self._get_node_by_id(node.children_ids[position])
-            position = 0
+        # Any occurrence of the key
+        if len(positions) == 0:
+            return node, None, False
+
+        if not self._is_leaf(node):
+            # Add the most right position for the last possible valid child
+            positions.append(positions[len(positions) - 1] + 1)
+
+            # Try to find valid children to search in all positions found
+            for position in positions:
+                child = self._get_node_by_id(node.children_ids[position])
+                # Verify if the key is in this node
+                if child.keys[len(child.keys) - 1] == key or not self._is_leaf(child):
+                    temp_node, temp_position, found = self._deep_search_by_key_and_content(child, key, content)
+
+                    if found:
+                        return temp_node, temp_position, found
+
+        return node, None, False
+
+    # Find all nodes with the key
+    def _deep_search_by_key(self, node, key) -> (list, bool):
+        positions = []
+        results = []
+        # Find the first occurrences
+        while True and node is not None:
+
+            # Find all occurrences of the key in node
+            while position < len(node.keys) and key >= node.keys[position]:
+                # If found the key stop
+                if key == node.keys[position]:
+                    positions.append(position)
+
+                position = position + 1
+
+            results.append([node, positions])
+
+            # Verify if the node is a leaf
+            if self._is_leaf(node):
+                if len(positions) == 0:
+                    return results, False
+                else:
+                    break
+            elif len(positions) == 0:
+                # Continue the find in the child
+                node = self._get_node_by_id(node.children_ids[position])
+                position = 0
+            else:
+                break
+
+        # Any occurrence of the key
+        if len(positions) == 0:
+            return results, False
+
+        # Try to find valid children to search in all positions found
+        for position in positions:
+            if not self._is_leaf(node):
+                child = self._get_node_by_id(node.children_ids[position])
+                # Verify if the key is in this node
+                if child.keys[len(child.keys) - 1] == key:
+                    new_results, found = self._deep_search_by_key(child, key)
+
+                    if found:
+                        results.extend(new_results)
+
+        return results, True
 
     # Get the saved root id in the database if exists
     # Return TRUE for success and FALSE if root is None
@@ -620,12 +742,12 @@ class BTree:
     # Return True if a node has the minimum size allowed
     @staticmethod
     def _has_minimum_size(node) -> bool:
-        return len(node.keys) == math.floor(node.keys_size/2)
+        return len(node.keys) == math.floor(node.keys_size / 2)
 
     # Return True if a node has a size equal or greater than the minimum allower
     @staticmethod
     def _greater_or_equal_than_minimum_size(node) -> bool:
-        return len(node.keys) >= math.floor(node.keys_size/2)
+        return len(node.keys) >= math.floor(node.keys_size / 2)
 
     ####################################################################################################################
     # Dir internal manager
