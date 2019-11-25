@@ -3,6 +3,15 @@ class Error(Exception):
     pass
 
 
+class SaveFunctionNotImplemented(Error):
+    """It's necessary to implement a save function in every database class."""
+
+
+class ChildNotFoundInDataBase(Error):
+    """Child attribute need be saved in database before saving the parent!"""
+    pass
+
+
 class AttributeNotFound(Error):
     """Attribute not found in the class"""
     pass

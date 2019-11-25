@@ -30,7 +30,7 @@ class BTree:
         if found:
             return contents
         else:  # If not return None
-            return None
+            return []
 
     # Return the id of the object with the key and content
     def find_with_key_and_content(self, key, content) -> list:
