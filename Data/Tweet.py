@@ -3,7 +3,6 @@ from nltk.stem.lancaster import LancasterStemmer
 from unidecode import unidecode
 
 from Data.Error.TwitterConversionException import TwitterConversionException
-from Database.Cons import SupportedTypes
 from Database.DBData import DBData
 
 _TAG_LIST = ['JJ', 'JJR ', 'JJS', 'NN', 'NNS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
@@ -18,6 +17,7 @@ class Tweet(DBData):
     text_size = 280
     filtered_text = ''
     filtered_text_size = 280
+    negative = False
 
     def save_data(self, tweet_data):
         try:
