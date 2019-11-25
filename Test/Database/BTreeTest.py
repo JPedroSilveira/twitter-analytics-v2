@@ -765,8 +765,75 @@ class BTreeTest(unittest.TestCase):
         for i in range(0, n_elements):
             self.assertEqual(objs[i].id, results[i])
 
+    def test_btree_insert_five_elements_with_the_same_key_and_find_all_of_one(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
-    # TO-DO Test listas (find key with all related contents)
+        objs = []
+        objs_1 = []
+        results = []
+        n_elements = 50
+
+        variable = 1
+        variable_max = 5
+
+        for i in range(0, n_elements):
+            obj = TestIntClass(variable)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            objs.append(obj)
+
+            if variable == 1:
+                objs_1.append(obj)
+
+            if variable == variable_max:
+                variable = 1
+            else:
+                variable = variable + 1
+
+        for i in range(0, n_elements):
+            result = btree.find_with_key_and_content(objs[i].external_id, objs[i].id)
+            results.append(result)
+
+        results_1 = btree.find(1)
+
+        manager.drop()
+
+        for obj_1 in objs_1:
+            self.assertTrue(obj_1.id in results_1)
+
+        for i in range(0, n_elements):
+            self.assertEqual(objs[i].id, results[i])
+
+
+    def test_btree_insert_much_repeated_elements_and_find_all_in_all(self):
+        manager = TableManager(TestIntClass)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
+
+        objs = []
+        n_elements = 100
+
+        variable = 1
+        variable_max = 5
+
+        for i in range(0, n_elements):
+            obj = TestIntClass(variable)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            objs.append(obj)
+
+            if variable == variable_max:
+                variable = 1
+            else:
+                variable = variable + 1
+
+        for i in range(1, variable_max + 1):
+            results = btree.find(i)
+            for obj in objs:
+                if obj.external_id == i:
+                    self.assertTrue(obj.id in results)
+
+        manager.drop()
 
 
 if __name__ == '__main__':

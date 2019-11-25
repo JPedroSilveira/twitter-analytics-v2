@@ -24,15 +24,10 @@ class BTree:
     # Return a list of the contents with the key
     def find(self, key) -> list:
         root = self._get_root()
-        results, found = self._deep_search_by_key(root, key)
-        contents = []
+        contents, found = self._deep_search_by_key(root, key)
+
         # If found return the contents
         if found:
-            for result in results:
-                node = result[0]
-                for position in result[1]:
-                    contents.append(node.contents[position])
-
             return contents
         else:  # If not return None
             return None
@@ -645,11 +640,10 @@ class BTree:
             for position in positions:
                 child = self._get_node_by_id(node.children_ids[position])
                 # Verify if the key is in this node
-                if child.keys[len(child.keys) - 1] == key or not self._is_leaf(child):
-                    temp_node, temp_position, found = self._deep_search_by_key_and_content(child, key, content)
+                temp_node, temp_position, found = self._deep_search_by_key_and_content(child, key, content)
 
-                    if found:
-                        return temp_node, temp_position, found
+                if found:
+                    return temp_node, temp_position, found
 
         return node, None, False
 
@@ -657,6 +651,7 @@ class BTree:
     def _deep_search_by_key(self, node, key) -> (list, bool):
         positions = []
         results = []
+        position = 0
         # Find the first occurrences
         while True and node is not None:
 
@@ -665,10 +660,8 @@ class BTree:
                 # If found the key stop
                 if key == node.keys[position]:
                     positions.append(position)
-
+                    results.append(node.contents[position])
                 position = position + 1
-
-            results.append([node, positions])
 
             # Verify if the node is a leaf
             if self._is_leaf(node):
@@ -676,7 +669,7 @@ class BTree:
                     return results, False
                 else:
                     break
-            elif len(positions) == 0:
+            elif len(results) == 0:
                 # Continue the find in the child
                 node = self._get_node_by_id(node.children_ids[position])
                 position = 0
@@ -688,15 +681,15 @@ class BTree:
             return results, False
 
         # Try to find valid children to search in all positions found
-        for position in positions:
-            if not self._is_leaf(node):
+        if not self._is_leaf(node):
+            positions.append(positions[len(positions) - 1] + 1)
+            for position in positions:
                 child = self._get_node_by_id(node.children_ids[position])
                 # Verify if the key is in this node
-                if child.keys[len(child.keys) - 1] == key:
-                    new_results, found = self._deep_search_by_key(child, key)
+                new_results, found = self._deep_search_by_key(child, key)
 
-                    if found:
-                        results.extend(new_results)
+                if found:
+                    results.extend(new_results)
 
         return results, True
 
