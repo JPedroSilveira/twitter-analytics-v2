@@ -21,7 +21,13 @@ def get_columns(obj_class: type) -> list:
 
 # Return the name of the class
 def get_class_name(obj_class: type) -> str:
-    return obj_class.__name__
+    name = obj_class.__name__
+    point_pos = name.find(".")
+    while point_pos >= 0 and len(name) > point_pos + 1:
+        name = name[point_pos + 1:]
+        point_pos = name.find(".")
+
+    return name
 
 
 # Return the name of the primitive type of a attribute
@@ -80,8 +86,7 @@ def get_column_size(obj_class: type, column: str) -> int:
         # int size that is used to save the real list size
         return list_size * list_type_size + SupportedTypes.INT_SIZE
 
-    raise ClassError.AttributeWithoutValidPrimitiveType('Class ' + obj_class + ' has a attribute ' + column +
-                                                        ' with a invalid type!')
+    raise ClassError.AttributeWithoutValidPrimitiveType('Class has an attribute swith a invalid type!')
 
 
 def get_list_type_attribute(obj_class: type, column: str):

@@ -1,5 +1,6 @@
 import math
 
+from Database.Error import ClassError
 from Database.Index.BTree.BTreeInfo import BTreeInfo
 from Database.TableManager import TableManager
 from Database.Cons import FileName
@@ -7,8 +8,9 @@ import Database.Helpers.ListHelper as ListHelper
 
 
 class BTree:
-    def __init__(self, index_name: str, node_class: object, ref_class: object):
+    def __init__(self, index_name: str, node_class: object, ref_class: object, content_class=None):
         # Start the table managers for the index tree
+        self.content_class = content_class
         self.node_class = node_class
         self.index_name = index_name
         self.btree_info = BTreeInfo()
@@ -22,18 +24,46 @@ class BTree:
             self._create_root()
 
     # Return a list of the contents with the key
-    def find(self, key) -> list:
+    def find_contents(self, key) -> list:
         root = self._get_root()
-        contents, found = self._deep_search_by_key(root, key)
+        contents_id, found = self._deep_search_by_key(root, key)
 
         # If found return the contents
         if found:
-            return contents
-        else:  # If not return None
+            return contents_id
+        else:  # If not return empty list
             return []
 
+    # Return a list of the contents with the key
+    def find(self, key) -> list:
+        if self.content_class is not None:
+            contents_id = self.find_contents(key)
+
+            contents_obj = []
+            for content_id in contents_id:
+                dbm = TableManager(self.content_class)
+                contents_obj.append(dbm.find_by_id(content_id))
+
+            return contents_obj
+        else:
+            raise ClassError("It's necessary a content class to use find")
+
+    # Return the first found, use when each key has just one content
+    def find_first_or_default(self, key) -> object:
+        if self.content_class is not None:
+            contents_id = self.find_contents(key)
+
+            # If found return the first content
+            if len(contents_id) > 0:
+                dbm = TableManager(self.content_class)
+                return dbm.find_by_id(contents_id[0])
+            else:  # If not return None
+                return None
+        else:
+            raise ClassError("It's necessary a content class to use find_first_or_default")
+
     # Return the id of the object with the key and content
-    def find_with_key_and_content(self, key, content) -> list:
+    def find_with_key_and_content(self, key, content):
         root = self._get_root()
         node, position, found = self._deep_search_by_key_and_content(root, key, content)
 
@@ -558,11 +588,11 @@ class BTree:
     # BTree internal functions
 
     # Search for the key
-    # If find: return the node with the leftest occurrence, the position of the content and true
+    # If find_contents: return the node with the leftest occurrence, the position of the content and true
     # If not: return the last node, none and false
     def _search(self, key) -> (object, bool):
         node = self._get_root()
-        # Try to find the key in the BTree using the nodes
+        # Try to find_contents the key in the BTree using the nodes
         # If key found return the id referenced by the key
         # Else return None
         while True:
@@ -591,11 +621,11 @@ class BTree:
                     return node, True
 
             if not go_out:
-                # Verify if the node is a leaf, if true the find ends without find the key
+                # Verify if the node is a leaf, if true the find_contents ends without find_contents the key
                 if self._is_leaf(node):
                     return node, False
 
-                # Continue the find in the child
+                # Continue the find_contents in the child
                 node = self._get_node_by_id(node.children_ids[position])
 
     # Find a node with the key and content and return the node and the key position
@@ -622,7 +652,7 @@ class BTree:
             if self._is_leaf(node):
                 return node, None, False
             elif len(positions) == 0:
-                # Continue the find in the child
+                # Continue the find_contents in the child
                 node = self._get_node_by_id(node.children_ids[position])
                 position = 0
             else:
@@ -636,7 +666,7 @@ class BTree:
             # Add the most right position for the last possible valid child
             positions.append(positions[len(positions) - 1] + 1)
 
-            # Try to find valid children to search in all positions found
+            # Try to find_contents valid children to search in all positions found
             for position in positions:
                 child = self._get_node_by_id(node.children_ids[position])
                 # Verify if the key is in this node
@@ -670,7 +700,7 @@ class BTree:
                 else:
                     break
             elif len(results) == 0:
-                # Continue the find in the child
+                # Continue the find_contents in the child
                 node = self._get_node_by_id(node.children_ids[position])
                 position = 0
             else:
@@ -680,7 +710,7 @@ class BTree:
         if len(positions) == 0:
             return results, False
 
-        # Try to find valid children to search in all positions found
+        # Try to find_contents valid children to search in all positions found
         if not self._is_leaf(node):
             positions.append(positions[len(positions) - 1] + 1)
             for position in positions:

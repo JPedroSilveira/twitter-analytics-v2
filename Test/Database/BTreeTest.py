@@ -795,7 +795,7 @@ class BTreeTest(unittest.TestCase):
             result = btree.find_with_key_and_content(objs[i].external_id, objs[i].id)
             results.append(result)
 
-        results_1 = btree.find(1)
+        results_1 = btree.find_contents(1)
 
         manager.drop()
 
@@ -828,7 +828,7 @@ class BTreeTest(unittest.TestCase):
                 variable = variable + 1
 
         for i in range(1, variable_max + 1):
-            results = btree.find(i)
+            results = btree.find_contents(i)
             for obj in objs:
                 if obj.external_id == i:
                     self.assertTrue(obj.id in results)
@@ -858,7 +858,7 @@ class BTreeTest(unittest.TestCase):
                 variable = variable + 1
 
         for i in range(1, variable_max + 1):
-            results = btree.find(i)
+            results = btree.find_contents(i)
             for obj in objs:
                 if obj.external_id == i:
                     self.assertTrue(obj.id in results)
