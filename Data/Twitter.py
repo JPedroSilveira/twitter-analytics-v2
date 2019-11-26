@@ -71,6 +71,7 @@ class Tweet(DBData):
 
     def __init__(self):
         self.hashtag_ids = Values.LIST_EMPTY()
+        self.negative = False
 
     def find_self(self):
         tweet_id_tweet = BTree('tweet_id_tweet', BTreeNodeInt, Tweet, Tweet)
