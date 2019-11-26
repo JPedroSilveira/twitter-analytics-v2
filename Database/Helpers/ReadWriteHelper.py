@@ -1,5 +1,6 @@
 import _io
 import re
+from unidecode import unidecode
 
 import Database.Cons.File as File
 import Database.Cons.SupportedTypes as SupportedTypes
@@ -145,6 +146,7 @@ def write_list_end_values(
 
 
 def _remove_invalid_char(value: str) -> str:
+    value = unidecode(value)
     return re.sub(r'[^\x00-\x7f]', r' ', value)
 
 

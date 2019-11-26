@@ -5,7 +5,7 @@ import Database.Helpers.FileIndexHelper as FileIndexHelper
 import Database.Helpers.ObjectHelper as ObjHelper
 import Database.Helpers.ObjectReadWriteHelper as ObjectReadWriteHelper
 from Database import DBData
-from Database.Cons import DBTypes
+from Database.Cons import DBTypes, Values
 
 
 class TableManager:
@@ -23,6 +23,11 @@ class TableManager:
             self.init_index(db_class, index_name, index_filename, ref_class)
         else:
             self.init_table(db_class)
+
+    @staticmethod
+    # Verify if a object is saved in database
+    def is_saved(obj):
+        return obj.saved and obj.id != Values.INT_EMPTY
 
     # Create and/or manage a table
     def init_table(self, db_class: type):

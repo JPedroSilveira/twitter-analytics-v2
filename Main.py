@@ -1,4 +1,4 @@
-from Data.Tweet import Tweet
+from Data.Twitter import Tweet
 from Twitter.TwitterCore import TwitterCore
 
 

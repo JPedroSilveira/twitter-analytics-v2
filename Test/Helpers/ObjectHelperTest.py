@@ -12,7 +12,7 @@ def compare_objs(obj_one: object, obj_two: object):
 
     attributes = ObjectHelper.get_columns(obj_one)
 
-    # Compare each attribute to find different values
+    # Compare each attribute to find_contents different values
     for attr in attributes:
         value_one = ObjectHelper.get_attr_value_by_name(obj_one, attr)
         value_two = ObjectHelper.get_attr_value_by_name(obj_two, attr)
@@ -21,5 +21,5 @@ def compare_objs(obj_one: object, obj_two: object):
         if value_one != value_two:
             return False
 
-    # If did't find any different value then return true
+    # If did't find_contents any different value then return true
     return True
