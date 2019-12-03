@@ -2,7 +2,7 @@ import math
 
 from Database.Error import ClassError
 from Database.Index.BTree.BTreeInfo import BTreeInfo
-from Database.TableManager import TableManager
+from Database.DBManager import DBManager
 from Database.Cons import FileName
 import Database.Helpers.ListHelper as ListHelper
 
@@ -14,9 +14,9 @@ class BTree:
         self.node_class = node_class
         self.index_name = index_name
         self.btree_info = BTreeInfo()
-        self.btree_info_table_manager = TableManager(
+        self.btree_info_table_manager = DBManager(
             BTreeInfo, self._get_index_dir(index_name), self._get_manager_name(), ref_class)
-        self.btree_node_table_manager = TableManager(
+        self.btree_node_table_manager = DBManager(
             node_class, self._get_index_dir(index_name), self._get_node_manager_name(), ref_class)
 
         # Load root if exists, if not create one
@@ -41,12 +41,12 @@ class BTree:
 
             contents_obj = []
             for content_id in contents_id:
-                dbm = TableManager(self.content_class)
+                dbm = DBManager(self.content_class)
                 contents_obj.append(dbm.find_by_id(content_id))
 
             return contents_obj
         else:
-            raise ClassError("It's necessary a content class to use find")
+            return self.find_contents(key)
 
     # Return the first found, use when each key has just one content
     def find_first_or_default(self, key) -> object:
@@ -55,12 +55,17 @@ class BTree:
 
             # If found return the first content
             if len(contents_id) > 0:
-                dbm = TableManager(self.content_class)
+                dbm = DBManager(self.content_class)
                 return dbm.find_by_id(contents_id[0])
             else:  # If not return None
                 return None
         else:
-            raise ClassError("It's necessary a content class to use find_first_or_default")
+            contents_id = self.find_contents(key)
+
+            if len(contents_id) > 0:
+                return contents_id[0]
+            else:
+                return None
 
     # Return the id of the object with the key and content
     def find_with_key_and_content(self, key, content):
@@ -72,6 +77,32 @@ class BTree:
             return node.contents[position]
         else:  # If not return None
             return None
+
+    def find_n_smallest(self, n):
+        smallest_list = self._find_n_smallest(n)
+
+        if self.content_class is not None:
+            contents_obj = []
+            for content_id in smallest_list:
+                dbm = DBManager(self.content_class)
+                contents_obj.append(dbm.find_by_id(content_id))
+
+            return contents_obj
+        else:
+            return smallest_list
+
+    def find_n_biggest(self, n):
+        biggest_list = self._find_n_biggest(n)
+
+        if self.content_class is not None:
+            contents_obj = []
+            for content_id in biggest_list:
+                dbm = DBManager(self.content_class)
+                contents_obj.append(dbm.find_by_id(content_id))
+
+            return contents_obj
+        else:
+            return biggest_list
 
     # Insert and update a key with it's content
     def insert(self, key, content):
@@ -465,12 +496,12 @@ class BTree:
         l_sibling = self._get_left_sibling(node, parent)
 
         if l_sibling is not None and not self._has_minimum_size(l_sibling):
-            self._borrow_from_left_sibling_and_delete(self, node, position, parent, l_sibling)
+            self._borrow_from_left_sibling_and_delete(node, position, parent, l_sibling)
         else:
             r_sibling = self._get_right_sibling(node, parent)
 
             if r_sibling is not None and not self._has_minimum_size(r_sibling):
-                self._borrow_from_right_sibling_and_delete(self, node, position, parent, r_sibling)
+                self._borrow_from_right_sibling_and_delete(node, position, parent, r_sibling)
             else:
                 return False
 
@@ -547,6 +578,29 @@ class BTree:
 
         # Return None if not exists
         return None
+
+    # Return the smallest child of a btree
+    def _get_biggest_child(self):
+        node = self._get_root()
+        bigger = node
+
+        while bigger is not None and not self._is_leaf(bigger):
+            bigger_child_id = bigger.children_ids[len(bigger.children_ids) - 1]
+            bigger = self._get_node_by_id(bigger_child_id)
+
+        return bigger
+
+    # Return the smallest child of a btree
+    def _get_smallest_child(self):
+        node = self._get_root()
+        smaller = node
+
+        while smaller is not None and not self._is_leaf(smaller):
+            smaller_child_id = smaller.children_ids[0]
+            smaller = self._get_node_by_id(smaller_child_id)
+
+        return smaller
+
 
     # Return the child before a node item using it's position
     def _get_predecessor_child(self, node, position):
@@ -722,6 +776,115 @@ class BTree:
                     results.extend(new_results)
 
         return results, True
+
+    # Return the n biggest keys
+    def _find_n_biggest(self, n, node=None, parent=False):
+        last = False
+
+        if node is None:
+            node = self._get_biggest_child()
+            if len(node.contents) < n:
+                n_biggest = node.contents
+                n_biggest.reverse()
+                init = len(node.children_ids) - 1
+            else:
+                n_biggest = node.contents[n * (-1):]
+                n_biggest.reverse()
+                return n_biggest
+
+            last = True
+        elif self._is_leaf(node):
+            init = len(node.children_ids) - 1
+            if len(node.contents) < n:
+                n_biggest = node.contents
+                n_biggest.reverse()
+            else:
+                n_biggest = node.contents[n * (-1):]
+                n_biggest.reverse()
+                return n_biggest
+        elif parent:
+            init = len(node.children_ids) - 2
+            n_biggest = [node.contents[len(node.contents) - 1]]
+            n_biggest.reverse()
+        else:
+            init = len(node.children_ids) - 1
+            n_biggest = []
+
+        if len(node.contents) > 0 and len(n_biggest) < n:
+            if not self._is_leaf(node):
+                for child_pos in range(init, -1, -1):
+                    child_node = self._get_node_by_id(node.children_ids[child_pos])
+                    n_biggest.extend(self._find_n_biggest(n - len(n_biggest), child_node))
+                    if len(n_biggest) >= n:
+                        return n_biggest
+                    if (child_pos - 1) >= 0:
+                        n_biggest.append(node.contents[child_pos - 1])
+                if len(n_biggest) < n and parent:
+                    n_biggest.extend(self._find_n_biggest(n - len(n_biggest),
+                                                            self._get_node_by_id(node.parent_id), True))
+
+                    return n_biggest
+                else:
+                    return n_biggest
+            elif not self._is_root(node) and last:
+                n_biggest.extend(self._find_n_biggest(n - len(n_biggest),
+                                                        self._get_node_by_id(node.parent_id), True))
+
+                return n_biggest
+            else:
+                return n_biggest
+        else:
+            return []
+
+    # Return the n smallest keys
+    def _find_n_smallest(self, n, node=None, parent=False):
+        init = 0
+        first = False
+
+        if node is None:
+            node = self._get_smallest_child()
+            if len(node.contents) < n:
+                n_smallest = node.contents
+            else:
+                return node.contents[0:n]
+
+            first = True
+        elif self._is_leaf(node):
+            if len(node.contents) < n:
+                n_smallest = node.contents
+            else:
+                return node.contents[0:n]
+        elif parent:
+            n_smallest = [node.contents[0]]
+            init = 1
+        else:
+            n_smallest = []
+
+        if len(node.contents) > 0 and len(n_smallest) < n:
+            if not self._is_leaf(node):
+                for child_pos in range(init, len(node.children_ids)):
+                    child_node = self._get_node_by_id(node.children_ids[child_pos])
+                    n_smallest.extend(self._find_n_smallest(n - len(n_smallest), child_node))
+                    if len(n_smallest) >= n:
+                        return n_smallest
+                    if child_pos < len(node.contents):
+                        n_smallest.append(node.contents[child_pos])
+                if len(n_smallest) < n and parent:
+                    n_smallest.extend(self._find_n_smallest(n - len(n_smallest),
+                                      self._get_node_by_id(node.parent_id), True))
+
+                    return n_smallest
+                else:
+                    return n_smallest
+            elif not self._is_root(node) and first:
+                n_smallest.extend(self._find_n_smallest(n - len(n_smallest),
+                                  self._get_node_by_id(node.parent_id), True))
+
+                return n_smallest
+            else:
+                return n_smallest
+        else:
+            return []
 
     # Get the saved root id in the database if exists
     # Return TRUE for success and FALSE if root is None

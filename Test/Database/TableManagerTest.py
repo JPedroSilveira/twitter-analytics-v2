@@ -3,7 +3,7 @@ import Test.Helpers.ObjectHelperTest as ObjectHelperTest
 from Database.Cons import SupportedTypes
 
 from Database.DBData import DBData
-from Database.TableManager import TableManager
+from Database.DBManager import DBManager
 
 
 class TestPrimitiveClass(DBData):
@@ -52,7 +52,7 @@ class TestComplexTypeClass(DBData):
 class TableManagerTest(unittest.TestCase):
 
     def test_save_primitive_class_one(self):
-        manager = TableManager(TestPrimitiveTypeClass)
+        manager = DBManager(TestPrimitiveTypeClass)
         obj = TestPrimitiveTypeClass()
         obj.set_new_values(1, False, 10.0)
         manager.save(obj)
@@ -64,7 +64,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj, obj_loaded))
 
     def test_save_two_primitive_class(self):
-        manager = TableManager(TestPrimitiveTypeClass)
+        manager = DBManager(TestPrimitiveTypeClass)
 
         obj1 = TestPrimitiveTypeClass()
         obj1.set_new_values(1, False, 10.0)
@@ -83,13 +83,13 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj2_l, obj2))
 
     def test_save_two_primitive_class_with_different_managers(self):
-        manager1 = TableManager(TestPrimitiveTypeClass)
+        manager1 = DBManager(TestPrimitiveTypeClass)
 
         obj1 = TestPrimitiveTypeClass()
         obj1.set_new_values(1, False, 10.0)
         manager1.save(obj1)
 
-        manager2 = TableManager(TestPrimitiveTypeClass)
+        manager2 = DBManager(TestPrimitiveTypeClass)
         obj2 = TestPrimitiveTypeClass()
         obj2.set_new_values(999, True, 0.0)
         manager2.save(obj2)
@@ -103,7 +103,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj2_l, obj2))
 
     def test_save_seven_primitive_class(self):
-        manager = TableManager(TestPrimitiveTypeClass)
+        manager = DBManager(TestPrimitiveTypeClass)
 
         obj1 = TestPrimitiveTypeClass()
         obj1.set_new_values(1, False, 10.0)
@@ -153,7 +153,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj7_l, obj7))
 
     def test_delete_primitive_type_class(self):
-        manager = TableManager(TestPrimitiveTypeClass)
+        manager = DBManager(TestPrimitiveTypeClass)
 
         obj1 = TestPrimitiveTypeClass()
         obj1.set_new_values(1, False, 10.0)
@@ -182,7 +182,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj3_l, obj3))
 
     def test_primitive_class_update(self):
-        manager = TableManager(TestPrimitiveTypeClass)
+        manager = DBManager(TestPrimitiveTypeClass)
 
         obj1 = TestPrimitiveTypeClass()
         obj1.set_new_values(1, False, 10.0)
@@ -209,7 +209,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj2_l, obj2))
 
     def test_save_complex_type_with_full_lists(self):
-        manager = TableManager(TestComplexTypeClass)
+        manager = DBManager(TestComplexTypeClass)
 
         obj = TestComplexTypeClass()
         obj.set_new_values(20, True, 102.3, 'Teste', [1, 3, 5, 6, 2, 3, 4, 2, 3, 1],
@@ -224,7 +224,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj_l, obj))
 
     def test_save_complex_type_with_empty_lists(self):
-        manager = TableManager(TestComplexTypeClass)
+        manager = DBManager(TestComplexTypeClass)
 
         obj = TestComplexTypeClass()
         obj.set_new_values(70, False, 156.59, 'Teste', [], [])
@@ -238,7 +238,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj_l, obj))
 
     def test_save_complex_type_with_empty_string_and_not_full_lists(self):
-        manager = TableManager(TestComplexTypeClass)
+        manager = DBManager(TestComplexTypeClass)
 
         obj = TestComplexTypeClass()
         obj.set_new_values(70, False, 156.59, '', [1, 2, 4], ['oiokda sa'])
@@ -252,7 +252,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj_l, obj))
 
     def test_save_complex_type_with_empty_string_and_full_lists(self):
-        manager = TableManager(TestComplexTypeClass)
+        manager = DBManager(TestComplexTypeClass)
 
         obj = TestComplexTypeClass()
         obj.set_new_values(70, False, 156.59, '', [1, 3, 5, 6, 2, 3, 4, 2, 3, 1],
@@ -267,7 +267,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj_l, obj))
 
     def test_save_complex_type_with_zero_values(self):
-        manager = TableManager(TestComplexTypeClass)
+        manager = DBManager(TestComplexTypeClass)
 
         obj = TestComplexTypeClass()
         obj.set_new_values(0, False, 0.0, '', [], [])
@@ -281,7 +281,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj_l, obj))
 
     def test_save_four_different_complex_type(self):
-        manager = TableManager(TestComplexTypeClass)
+        manager = DBManager(TestComplexTypeClass)
 
         obj1 = TestComplexTypeClass()
         obj1.set_new_values(0, False, 0.0, '', [], [])
@@ -314,7 +314,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj4_l, obj4))
 
     def test_save_four_different_complex_type_and_update_two(self):
-        manager = TableManager(TestComplexTypeClass)
+        manager = DBManager(TestComplexTypeClass)
 
         obj1 = TestComplexTypeClass()
         obj1.set_new_values(0, False, 0.0, '', [], [])
@@ -363,7 +363,7 @@ class TableManagerTest(unittest.TestCase):
         self.assertTrue(ObjectHelperTest.compare_objs(obj4_l, obj4))
 
     def test_save_four_different_complex_type_and_update_two_and_delete_two(self):
-        manager = TableManager(TestComplexTypeClass)
+        manager = DBManager(TestComplexTypeClass)
 
         obj1 = TestComplexTypeClass()
         obj1.set_new_values(0, False, 0.0, '', [], [])

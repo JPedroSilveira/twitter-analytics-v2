@@ -1,11 +1,12 @@
-from Core import NaturalLanguage
+from Core import NaturalLanguage, Analyze
 from Data.Error.TwitterConversionException import TwitterConversionException
 from Database.Error import ClassError as DBError
 from Database.Cons import Values
 from Database.Index.BTree.BTree import BTree
-from Database.Index.BTree.BTreeNode import BTreeNodeInt, BTreeNode280String
-from Database.TableManager import TableManager as DBManager
+from Database.Index.BTree.BTreeNode import BTreeNodeInt, BTreeNode280String, BTreeNodeFloat
+from Database.DBManager import DBManager
 from Database.DBData import DBData
+import Database.DBManager as DBM
 
 
 class User(DBData):
@@ -45,7 +46,7 @@ class User(DBData):
         dbm = DBManager(User)
         dbm.save(self)
 
-        if not DBManager.is_saved(self):
+        if not DBM.is_saved(self):
             bt_twitter_id_user = BTree('twitter_id_user', BTreeNodeInt, User, User)
             bt_twitter_id_user.insert(self.twitter_id, self.id)
 
@@ -54,7 +55,7 @@ class User(DBData):
         return dbm.find_by_id(id)
 
     def get_tweets(self):
-        if DBManager.is_saved(self):
+        if DBM.is_saved(self):
             bt_user_tweet = BTree('user_tweet', BTreeNodeInt, User, Tweet)
             return bt_user_tweet.find(self.id)
 
@@ -68,10 +69,12 @@ class Tweet(DBData):
     text_size = 280
     filtered_text = Values.STRING_EMPTY
     filtered_text_size = 280
+    negative = False
+    negative_score = 0
+    positive_score = 0
 
     def __init__(self):
         self.hashtag_ids = Values.LIST_EMPTY()
-        self.negative = False
 
     def find_self(self):
         tweet_id_tweet = BTree('tweet_id_tweet', BTreeNodeInt, Tweet, Tweet)
@@ -96,17 +99,24 @@ class Tweet(DBData):
             exception.error_handling()
             return False
 
+    # Return words in the filtered text with repeating
+    def get_filtered_words(self):
+        return list(filter(lambda x: x != '', self.filtered_text.split(' ')))
+
     def set_user(self, user):
         self.user_id = user.id
 
     def set_hashtags(self, hashtags):
         for hashtag in hashtags:
-            if DBManager.is_saved(hashtag):
+            if DBM.is_saved(hashtag):
                 self.hashtag_ids.append(hashtag.id)
+
+    def infer(self):
+        self.negative, self.positive_score, self.negative_score = Analyze.infer_emotion(self)
 
     def db_save(self):
         if self.user_id != Values.INT_EMPTY:
-            if not DBManager.is_saved(self):
+            if not DBM.is_saved(self):
                 dbm = DBManager(Tweet)
                 dbm.save(self)
 
@@ -119,6 +129,12 @@ class Tweet(DBData):
 
                 bt_user_tweet = BTree('user_tweet', BTreeNodeInt, User, Tweet)
                 bt_user_tweet.insert(self.user_id, self.id)
+
+                bt_tweet_positive_score = BTree('tweet_positive_score', BTreeNodeFloat, Tweet, Tweet)
+                bt_tweet_positive_score.insert(self.positive_score, self.id)
+
+                bt_tweet_negative_score = BTree('tweet_negative_score', BTreeNodeFloat, Tweet, Tweet)
+                bt_tweet_negative_score.insert(self.negative_score, self.id)
         else:
             raise DBError.ChildNotFoundInDataBase("You need to set User before saving a Tweet!")
 
@@ -127,7 +143,7 @@ class Tweet(DBData):
         return dbm.find_by_id(id)
 
     def db_delete(self):
-        if DBManager.is_saved(self):
+        if DBM.is_saved(self):
             dbm = DBManager(Tweet)
             dbm.delete(self)
 
@@ -139,7 +155,7 @@ class Tweet(DBData):
             return []
 
     def get_hashtags(self) -> list:
-        if DBManager.is_saved(self):
+        if DBM.is_saved(self):
             bt_tweet_hashtag = BTree('tweet_hashtag', BTreeNodeInt, Tweet, Hashtag)
             return bt_tweet_hashtag.find(self.id)
 
@@ -182,12 +198,12 @@ class Hashtag(DBData):
         bt_hashtag_tweet.insert(self.id, tweet.id)
 
     def db_delete(self):
-        if DBManager.is_saved(self):
+        if DBM.is_saved(self):
             dbm = DBManager(Hashtag)
             dbm.delete(self)
 
     def get_tweets(self) -> list:
-        if DBManager.is_saved(self):
+        if DBM.is_saved(self):
             bt_hashtag = BTree('hashtag_tweet', BTreeNodeInt, Hashtag, Tweet)
             return bt_hashtag.find(self.id)
         else:

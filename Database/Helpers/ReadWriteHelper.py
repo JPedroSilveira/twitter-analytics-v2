@@ -80,8 +80,9 @@ def write_list(buffer: _io.BufferedRandom, values: list, max_size: int, list_typ
 
     # Error if the list size is bigger than the max_size
     if len(values) > max_size:
-        raise ReadWriteError.WritingAListBiggerThanMaxSize(
-            'The list size ' + str(len(values)) + ' is bigger than expected ' + max_size + '!')
+        values = values[:max_size]
+        #raise ReadWriteError.WritingAListBiggerThanMaxSize(
+         #   'The list size ' + str(len(values)) + ' is bigger than expected ' + max_size + '!')
 
     # If String type then verify if the max size of each string is given
     if list_type == SupportedTypes.STRING_NAME and list_string_size is None:

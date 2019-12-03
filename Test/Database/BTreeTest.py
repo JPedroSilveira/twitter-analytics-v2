@@ -3,7 +3,7 @@ import unittest
 from Database.DBData import DBData
 from Database.Index.BTree.BTree import BTree
 from Database.Index.BTree.BTreeNode import BTreeNode50String, BTreeNodeInt, BTreeNode
-from Database.TableManager import TableManager
+from Database.DBManager import DBManager
 
 _TEST_DEGREE = 3
 
@@ -12,6 +12,13 @@ class TestIntClass(DBData):
     external_id = 0
 
     def __init__(self, external_id: int):
+        self.external_id = external_id
+
+
+class TestIntClassSet(DBData):
+    external_id = 0
+
+    def set(self, external_id: int):
         self.external_id = external_id
 
 
@@ -52,7 +59,7 @@ class BTreeNodeIntTest(BTreeNodeInt):
 class BTreeTest(unittest.TestCase):
 
     def test_btree_with_two_int_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         obj1 = TestIntClass(927803)
@@ -73,7 +80,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(obj2.id, obj2_id)
 
     def test_btree_with_two_string_values(self):
-        manager = TableManager(TestStringClass)
+        manager = DBManager(TestStringClass)
         btree = BTree('unique_name', BTreeNode50StringTest, TestStringClass)
 
         obj1 = TestStringClass('fulano_id')
@@ -94,7 +101,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(obj2.id, obj2_id)
 
     def test_btree_int_with_three_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         obj1 = TestIntClass(927803)
@@ -120,7 +127,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(obj3.id, obj3_id)
 
     def test_btree_int_with_ten_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         obj1 = TestIntClass(927803)
@@ -181,7 +188,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(obj10.id, obj10_id)
 
     def test_btree_int_with_ten_consecutive_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         obj_list = []
@@ -199,7 +206,7 @@ class BTreeTest(unittest.TestCase):
         manager.drop()
 
     def test_btree_int_with_sixteen_consecutive_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         obj_list = []
@@ -217,7 +224,7 @@ class BTreeTest(unittest.TestCase):
         manager.drop()
 
     def test_btree_int_with_one_hundred_consecutive_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         obj_list = []
@@ -235,7 +242,7 @@ class BTreeTest(unittest.TestCase):
         manager.drop()
 
     def test_btree_string_with_sixteen_string_values(self):
-        manager = TableManager(TestStringClass)
+        manager = DBManager(TestStringClass)
         btree = BTree('unique_name', BTreeNode50StringTest, TestStringClass)
 
         obj_list = []
@@ -256,7 +263,7 @@ class BTreeTest(unittest.TestCase):
         manager.drop()
 
     def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_from_leaf(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         for x in range(0, 31):
@@ -283,7 +290,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(30, obj_id_5)
 
     def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_from_leaf_and_intern(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         for x in range(0, 31):
@@ -309,7 +316,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4)
 
     def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_from_leaf_and_intern_with_intern_child(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         for x in range(0, 31):
@@ -340,9 +347,8 @@ class BTreeTest(unittest.TestCase):
         manager.drop()
         self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4 or obj_id_5 or obj_id_6)
 
-
     def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_from_root(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         for x in range(0, 31):
@@ -381,7 +387,7 @@ class BTreeTest(unittest.TestCase):
                          or obj_id_6 or obj_id_7 or obj_id_8)
 
     def test_btree_int_insert_and_delete_from_root(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         obj = TestIntClass(0)
@@ -396,7 +402,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(None, obj_id_1)
 
     def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_middle_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         for x in range(0, 31):
@@ -406,7 +412,7 @@ class BTreeTest(unittest.TestCase):
 
         # Delete leaf nodes
         # Delete the smallest
-        btree.delete(0 ,0)
+        btree.delete(0, 0)
         # Delete the bigger
         btree.delete(1, 1)
         # Delete intern above a leaf
@@ -438,7 +444,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(None, obj_id_1 or obj_id_2 or obj_id_3 or obj_id_4)
 
     def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_all_in_desc_order(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         for x in range(0, 31):
@@ -455,7 +461,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(None, obj_id)
 
     def test_btree_int_insert_with_sixteen_consecutive_values_and_delete_all_in_asc_order(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         for x in range(0, 31):
@@ -472,7 +478,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(None, obj_id)
 
     def test_btree_with_repeated_key_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         obj1 = TestIntClass(1)
@@ -503,7 +509,7 @@ class BTreeTest(unittest.TestCase):
         self.assertEqual(obj4.id, obj4_id)
 
     def test_btree_with_much_repeated_key_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -525,7 +531,7 @@ class BTreeTest(unittest.TestCase):
             self.assertEqual(objs[i].id, results[i])
 
     def test_btree_with_much_more_repeated_key_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -547,7 +553,7 @@ class BTreeTest(unittest.TestCase):
             self.assertEqual(objs[i].id, results[i])
 
     def test_btree_with_much_more_different_repeated_key_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -577,9 +583,8 @@ class BTreeTest(unittest.TestCase):
         for i in range(0, n_elements):
             self.assertEqual(objs[i].id, results[i])
 
-
     def test_btree_with_much_much_more_different_repeated_key_values(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -610,7 +615,7 @@ class BTreeTest(unittest.TestCase):
             self.assertEqual(objs[i].id, results[i])
 
     def test_btree_with_one_hundred_values_and_ten_repeated(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -641,7 +646,7 @@ class BTreeTest(unittest.TestCase):
             self.assertEqual(objs[i].id, results[i])
 
     def test_btree_with_one_hundred_values_and_five_repeated(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -671,9 +676,8 @@ class BTreeTest(unittest.TestCase):
         for i in range(0, n_elements):
             self.assertEqual(objs[i].id, results[i])
 
-
     def test_btree_with_two_hundred_values_and_five_repeated(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -704,7 +708,7 @@ class BTreeTest(unittest.TestCase):
             self.assertEqual(objs[i].id, results[i])
 
     def test_btree_with_two_hundred_values_and_two_repeated(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -735,7 +739,7 @@ class BTreeTest(unittest.TestCase):
             self.assertEqual(objs[i].id, results[i])
 
     def test_btree_with_two_hundred_values_and_one_hundred_repeated(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -766,7 +770,7 @@ class BTreeTest(unittest.TestCase):
             self.assertEqual(objs[i].id, results[i])
 
     def test_btree_insert_five_elements_with_the_same_key_and_find_all_of_one(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -805,9 +809,8 @@ class BTreeTest(unittest.TestCase):
         for i in range(0, n_elements):
             self.assertEqual(objs[i].id, results[i])
 
-
     def test_btree_insert_much_repeated_elements_and_find_all_in_all(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -835,9 +838,8 @@ class BTreeTest(unittest.TestCase):
 
         manager.drop()
 
-
     def test_btree_insert_much_more_repeated_elements_and_find_all_in_all(self):
-        manager = TableManager(TestIntClass)
+        manager = DBManager(TestIntClass)
         btree = BTree('external_id', BTreeNodeIntTest, TestIntClass)
 
         objs = []
@@ -865,6 +867,165 @@ class BTreeTest(unittest.TestCase):
 
         manager.drop()
 
+    def test_find_smallest_five(self):
+        manager = DBManager(TestIntClassSet)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClassSet, TestIntClassSet)
+
+        objs = []
+        n_elements = 10
+        n_smallest = 5
+
+        for i in range(0, n_elements):
+            obj = TestIntClassSet()
+            obj.set(i)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            objs.append(obj)
+
+        results = btree.find_n_smallest(n_smallest)
+
+        value = 0
+        for result in results:
+            self.assertEqual(result.external_id, value)
+            value = value + 1
+
+        manager.drop()
+
+    def test_find_biggest_five(self):
+        manager = DBManager(TestIntClassSet)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClassSet, TestIntClassSet)
+
+        objs = []
+        n_elements = 10
+        n_biggest = 5
+
+        for i in range(0, n_elements):
+            obj = TestIntClassSet()
+            obj.set(i)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            objs.append(obj)
+
+        results = btree.find_n_biggest(n_biggest)
+
+        value = 9
+        for result in results:
+            self.assertEqual(result.external_id, value)
+            value = value - 1
+
+        manager.drop()
+
+    def test_find_smallest_fifth(self):
+        manager = DBManager(TestIntClassSet)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClassSet, TestIntClassSet)
+
+        objs = []
+        n_elements = 200
+        n_smallest = 50
+
+        for i in range(0, n_elements):
+            obj = TestIntClassSet()
+            obj.set(i)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            objs.append(obj)
+
+        results = btree.find_n_smallest(n_smallest)
+
+        value = 0
+        for result in results:
+            self.assertEqual(result.external_id, value)
+            value = value + 1
+
+        manager.drop()
+
+    def test_find_biggest_fifth(self):
+        manager = DBManager(TestIntClassSet)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClassSet, TestIntClassSet)
+
+        objs = []
+        n_elements = 200
+        n_biggest = 50
+
+        for i in range(0, n_elements):
+            obj = TestIntClassSet()
+            obj.set(i)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            objs.append(obj)
+
+        results = btree.find_n_biggest(n_biggest)
+
+        value = 199
+        for result in results:
+            self.assertEqual(result.external_id, value)
+            value = value - 1
+
+        manager.drop()
+
+    def test_find_smallest_eleven_with_repeated_values(self):
+        manager = DBManager(TestIntClassSet)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClassSet, TestIntClassSet)
+
+        objs = []
+        n_elements = 100
+        n_repeat = 10
+        n_smallest = 15
+        value = 0
+
+        for i in range(0, n_elements):
+            obj = TestIntClassSet()
+            obj.set(value)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            objs.append(obj)
+
+            if value == n_repeat:
+                value = 0
+            else:
+                value = value + 1
+
+        results = btree.find_n_smallest(n_smallest)
+
+        value = 0
+        correct_result = [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1]
+        for result in results:
+            self.assertEqual(result.external_id, correct_result[value])
+            value = value + 1
+
+        manager.drop()
+
+    def test_find_biggest_eleven_with_repeated_values(self):
+        manager = DBManager(TestIntClassSet)
+        btree = BTree('external_id', BTreeNodeIntTest, TestIntClassSet, TestIntClassSet)
+
+        objs = []
+        n_elements = 100
+        n_repeat = 10
+        n_biggest = 15
+        value = 0
+
+        for i in range(0, n_elements):
+            obj = TestIntClassSet()
+            obj.set(value)
+            manager.save(obj)
+            btree.insert(obj.external_id, obj.id)
+            objs.append(obj)
+
+            if value == n_repeat:
+                value = 0
+            else:
+                value = value + 1
+
+        results = btree.find_n_biggest(n_biggest)
+
+        value = 0
+        correct_result = [10,10,10,10,10,10,10,10,10,9,9,9,9,9,9]
+        for result in results:
+            self.assertEqual(correct_result[value], result.external_id)
+            value = value + 1
+
+        manager.drop()
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,7 +2,7 @@ import unittest
 
 from Data.Twitter import Tweet, Hashtag, User
 from Database.Cons import Values
-from Database.TableManager import TableManager
+from Database.DBManager import DBManager
 from Twitter.TwitterStreamer import AnalitycalTwitterStreamer
 from Core import NaturalLanguage
 from unidecode import unidecode
@@ -246,11 +246,11 @@ class TwitterSaverTest(unittest.TestCase):
         self.assertEqual(user_tweets_4[0].created_at, tweet_4.created_at)
         self.assertEqual(user_tweets_5[0].created_at, tweet_5.created_at)
 
-        manager = TableManager(Hashtag)
+        manager = DBManager(Hashtag)
         manager.drop()
-        manager = TableManager(Tweet)
+        manager = DBManager(Tweet)
         manager.drop()
-        manager = TableManager(User)
+        manager = DBManager(User)
         manager.drop()
 
 

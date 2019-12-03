@@ -7,8 +7,8 @@
 # Ignore Twitter Credentials
 Twitter/twitter_credentials.json
 
-# Ignore Databases
-*.db
+# Ignora CSV (datasets)
+*.csv
 
 # Ignore Database
-Database\Database
+*.dbt

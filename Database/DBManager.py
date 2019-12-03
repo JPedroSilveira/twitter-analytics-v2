@@ -8,8 +8,15 @@ from Database import DBData
 from Database.Cons import DBTypes, Values
 
 
-class TableManager:
+# Verify if a object is saved in database
+from Database.Error.ReadWriteError import WritingAListBiggerThanMaxSize
 
+
+def is_saved(obj):
+    return obj.saved and obj.id != Values.INT_EMPTY
+
+
+class DBManager:
     db_class = None
     db_columns = None
     class_name = None
@@ -23,11 +30,6 @@ class TableManager:
             self.init_index(db_class, index_name, index_filename, ref_class)
         else:
             self.init_table(db_class)
-
-    @staticmethod
-    # Verify if a object is saved in database
-    def is_saved(obj):
-        return obj.saved and obj.id != Values.INT_EMPTY
 
     # Create and/or manage a table
     def init_table(self, db_class: type):
@@ -57,11 +59,14 @@ class TableManager:
     # Save a new record in the table
     # Return a updated object with database data like id
     def save(self, obj):
-        # If already saved try to update
-        if obj.saved:
-            self._update(obj)
-        else:  # If not save a new registry
-            self._save(obj)
+        try:
+            # If already saved try to update
+            if obj.saved:
+                self._update(obj)
+            else:  # If not save a new registry
+                self._save(obj)
+        except WritingAListBiggerThanMaxSize:
+            return
 
     def _save(self, obj):
         with open(self.table_file, 'ab') as table_file:
