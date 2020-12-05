@@ -1,4 +1,4 @@
-Twitter_Analytics_2_0
+Twitter Analytics 2
 College project to apply file manipulation techniques.
 
 This project use pipenv to simplify the management of dependencies.
@@ -14,5 +14,5 @@ To execute in command line use (in main repository):
 
 You need Python 3.8 installed to run this project
 
-To use Twitter Streamer function (to search for new tweets) you will need to create a twitter developer account (https://developer.twitter.com/en/apply-for-access) with an app. Create a JSON file named "twitter_credentials.json" in Twitter folder with the following format:
+To use Twitter Streamer function (search for new tweets) you will need to create a twitter developer account (https://developer.twitter.com/en/apply-for-access). Create a JSON file named "twitter_credentials.json" in Twitter folder with the following format:
 {"CONSUMER_KEY": "Put your consumer key here", "CONSUMER_SECRET": "Put your consumer secret here", "ACCESS_TOKEN": "Put your access token here", "ACCESS_SECRET": "Put your access secret here" }
