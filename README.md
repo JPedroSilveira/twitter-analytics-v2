@@ -1,5 +1,5 @@
 Twitter Analytics 2
-College project to apply file manipulation techniques.
+project to apply file manipulation techniques.
 
 This project use pipenv to simplify the management of dependencies.
  - pipenv shell
